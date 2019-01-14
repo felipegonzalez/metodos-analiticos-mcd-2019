@@ -7,7 +7,7 @@ en un contenedor (con [imagen base de rocker](https://www.rocker-project.org, y 
 
 ```
 docker build -t ma-rstudio .
-docker run --rm -p 8787:8787 -v ~/tu/carpeta/local:/home/rstudio/ma ma-rstudio
+docker run --rm -p 8787:8787 -e PASSWORD=mipass -v ~/tu/carpeta/local:/home/rstudio/ma ma-rstudio
 ```
 
 - Para correr las notas usa el script notas/\_build.sh. Abre el archivo notas/\_book/index.html para ver tu copia local de las notas.
