@@ -15,7 +15,7 @@ docker run --rm -p 8787:8787 -v ~/tu/carpeta/local:/home/rstudio/ma ma-rstudio
 - Todos los ejercicios y tareas corren también en ese contenedor. Es opcional usarlo,
 pero si tienes problemas de reproducibilidad puedes intentarlo.
 
-- Puedes también utilizar un contenedor en Google Cloud si necesitas una computadora más grande (o correr en un cluster), usando la imagen: 
+- Puedes también utilizar un contenedor en Google Cloud si necesitas una computadora más grande usando la imagen: 
 
 ```
 gcr.io/metodos-analiticos-clase/ma-rstudio@sha256:aebf01da86d9903f1136394cad1f93533584a25f91239f9df9f1e33aee993572
