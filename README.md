@@ -18,7 +18,7 @@ pero si tienes problemas de reproducibilidad puedes intentarlo.
 - Puedes también utilizar un contenedor en Google Cloud si necesitas una computadora más grande usando la imagen: 
 
 ```
-gcr.io/metodos-analiticos-clase/ma-rstudio@sha256:aebf01da86d9903f1136394cad1f93533584a25f91239f9df9f1e33aee993572
+gcr.io/metodos-analiticos-clase/ma-rstudio@sha256:9a36c845fbf2761baa3b76dc69c259e8dcd255dc18d252d9c1c5c32aca4ad9c7
 ```
 
 
