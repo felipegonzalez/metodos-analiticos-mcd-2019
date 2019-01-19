@@ -231,18 +231,19 @@ Si reducimos el soporte a 0.0001 (que implica prácticamente que queremos contar
 los itemsets que ocurren), obtenemos:
 
 ```{r gigante}
-pars_2 <- list(supp = 0.0001, target='frequent itemsets', maxtime = 0, maxlen = 7)
+pars_2 <- list(supp = 0.0001, target='frequent itemsets', maxtime = 0, maxlen = 6)
 ap_todos <- apriori(lista_mb, parameter = pars_2)
 ```
 
-Entonces el número de itemsets que obtenemos (longitud menor o igual a 7) es 
+Entonces el número de itemsets que obtenemos (longitud menor o igual a 5) es 
 
 ```{r}
 length(ap_todos)
 ```
 
 que es órdenes de magnitud más grande que el conjunto de todas las transacciones. 
-En este ejemplo chico, el cálculo de esta colección puede requerir hasta unos 4Gb de memoria (8Gb no son suficientes para encontrar los de tamaño 8, 9 y 10).
+En este ejemplo chico, el cálculo de esta colección (hasta canastas de tamaño 7) 
+puede requerir hasta unos 4Gb de memoria (8Gb no son suficientes para encontrar los de tamaño 8, 9 y 10).
 Puedes ver entonces que para conjuntos de transacciones masivos, **contar todos los itemsets generalmente será un proceso muy lento si no es que más bien infactible**.
 
 
@@ -753,10 +754,13 @@ a error de estimación. Los valores más grandes de lift generalmente son sobree
 - Si regresamos a incrementar soporte y confianza, potencialmente perdemos reglas interesantes.
 
 
-Podemos usar el modelo de independencia 
-Veamos cómo se comportan confianza y lift para el modelo donde no hay asociaciones. Obsérvese
-que en este modelo *todas las confianzas son iguales a la frecuencia del consecuente, y
-todos los valores de lift son 1*:
+ 
+Veamos cómo se comportan confianza y lift para el modelo donde no hay asociaciones. 
+Utilizamos el **modelo de independencia** que explicamos arriba. 
+
+Obsérvese
+que en este modelo *todas las confianzas teóricas son iguales a la frecuencia del consecuente, y
+todos los valores teóricos de lift son 1*:
 
 ```{r}
 sims_reglas <- lapply(1:10, function(i){
@@ -834,6 +838,10 @@ ver los detalles en [@hyper].
 *lift*, son dos medidas de calidad de asociación diferentes, pero similares
 en cuanto a lo que quieren capturar.
 
+### Hyper-lift bajo hipótesis de independencia {-}
+
+Veamos cómo se comporta el *hyper-lift* simulando datos con el modelo de independencia:
+
 ```{r}
 trans <- simular_transacciones(nItems = 169, 
                                nTrans = 10000, 
@@ -851,7 +859,7 @@ agregar_hyperlift <- function(reglas, trans){
 ap_random <- agregar_hyperlift(ap_random, trans)
 ```
 
-Podemos ver cómo se relacionan lift y hyper_lift. Vemos claramente
+ Vemos claramente
 que la gran mayoría de reglas obtenidas ahora tienen hyper-lift menor
 que uno
 
@@ -859,7 +867,7 @@ que uno
 plot(ap_random, measure=c('lift','hyper_lift'), shading = 'support')
 ```
 
-Cortando en un valor relativamente bajo, vemos que nos deshacemos
+Cortando en un valor relativamente bajo de *hyper-lift*, vemos que nos deshacemos
 correctamente de casi todas las reglas:
 
 ```{r, collapse=TRUE}
@@ -867,6 +875,10 @@ length(ap_random)
 length(subset(ap_random, lift > 1))
 length(subset(ap_random, hyper_lift > 1))
 ```
+
+
+### Hyper-lift para datos de canastas {-}
+
 
 Ahora aplicamos a los datos reales
 
@@ -904,21 +916,25 @@ de soporte
 
 ```{r, fig.width=4, fig.asp=1}
 qqplot(quality(filtradas_hl)$support, 
-       quality(filtradas_lift)$support, xlab = 'Hyper-lift',
-       ylab = 'Lift', main = 'Soporte')
+       quality(filtradas_lift)$support, xlab = 'Filtro Hyper-lift',
+       ylab = 'Filtro Lift', main = 'Soporte')
 ```
 
-Sin embargo, la distribución de valores de lift no es tan diferente:
+Sin embargo, la distribución de valores de lift no es tan diferente, de forma que esta
+medida de calidad no se degrada en el conjunto de reglas que encontramos:
 
 ```{r, fig.width=4, fig.asp=1}
 qqplot(quality(filtradas_hl)$lift, 
        quality(filtradas_lift)$lift,
-       xlab = 'Hyper-lift',
-       ylab = 'Lift', main = 'Lift')
+       xlab = 'Filtro Hyper-lift',
+       ylab = 'Filtro Lift', main = 'Lift')
 ```
 
-En resumen, al descartar aquellas reglas con soporte bajo que
-tienen lift alto por azar, encontramos reglas de mejor calidad en general.
+En resumen, al utilizar *hyper-lift* para filtrar reglas en lugar de *lift*:
+
+- Descartamos más reglas de soporte bajo que tienen lift alto por azar.
+- Los valores de soporte de las reglas tienden a ser más altos.
+- Los valores de *lift* son comparables
 
 
 ## Selección de reglas
@@ -937,7 +953,7 @@ más una reexpresión de la información contenida en los itemsets frecuentes.
 En este caso, podemos filtrar con soporte alto, para evitar estimaciones ruidosas (por ejemplo, soporte  mínimo de 300 canastas).
 
 
-- *Interacciones altas*: en este enfoque donde buscamos entender nichos. Consideramos valores de soporte y confianza más bajos, pero con valores de lift alto. Este análisis es más útil para entender, por ejemplo, propósitos de compras, convivencia de artículos, tipos de comprador, etc.
+- *Interacciones altas*: en este enfoque donde buscamos entender nichos. Consideramos valores de soporte y confianza más bajos, pero con valores de *lift/hyper-lift* alto. Este análisis es más útil para entender, por ejemplo, propósitos de compras, convivencia de artículos, tipos de comprador, etc.
 
 - *Colección de reglas para hacer querys*:  la colección de reglas puede ser
 más grande, e incluir por ejemplo resultados de distintas corridas de
@@ -966,7 +982,8 @@ Podemos ordenar por hyper-lift:
 plotly_arules(reglas_1, colors=c('red','gray'))
 reglas_1 <- agregar_hyperlift(reglas_1, lista_mb)
 DT::datatable(DATAFRAME(sort(reglas_1, by='hyper_lift')) %>%
-                mutate_if(is.numeric, funs(round(., 3))))
+                select(-count, -lhs.support) %>% 
+                mutate_if(is.numeric, funs(round(., 2))))
 ```
 
 **Observaciones**: conforme bajamos en esta tabla (ordenada por soporte), las estimaciones
@@ -1001,6 +1018,7 @@ b_reglas_lift <- subset(b_reglas,
                         lhs.support > 0.01)
 b_reglas_lift <- sort(b_reglas_lift, by = 'hyper_lift')
 DT::datatable(DATAFRAME(b_reglas_lift)  %>%
+                select(-count, -lhs.support) %>% 
                 mutate_if(is.numeric, funs(round(., 3))))
 ```
 
@@ -1035,6 +1053,7 @@ library(tidygraph)
 library(ggraph)
 df_reglas <- reglas_f %>% DATAFRAME %>% rename(from=LHS, to=RHS) %>% as_data_frame
 df_reglas$weight <- log(df_reglas$hyper_lift)
+nrow(df_reglas)
 graph_1 <- as_tbl_graph(df_reglas) %>%
   mutate(centrality = centrality_degree(mode = "all")) 
 
@@ -1056,8 +1075,9 @@ para investigar las redes que obtenemos (como [Gephi](https://gephi.org)):
 ```{r}
 library(readr)
 b_reglas_lift <- subset(b_reglas, 
-                        hyper_lift > 1.75 & confidence > 0.05)
+                        hyper_lift > 1.5 & lhs.support > 0.01)
 reglas_f <- subset(b_reglas_lift, size(b_reglas_lift)==2)
+length(reglas_f)
 write_csv(reglas_f %>% DATAFRAME %>% rename(source=LHS, target=RHS) %>%
             select(-count), 
           path='./salidas/reglas.csv')
