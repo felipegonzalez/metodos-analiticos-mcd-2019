@@ -21,8 +21,8 @@ otros propósitos, como veremos más adelante.
 ## Datos de canastas
 
 Consideremos el siguiente ejemplo chico del paquete *arules*.
-Contiene unas 10 mil canastas observadas en de un supermercado durante un mes,
-agregadas a 169 categorías. En muchos casos prácticos, el número de canastas o transacciones
+Contiene unas $10$ mil canastas observadas en de un supermercado durante un mes,
+agregadas a $169$ categorías. En muchos casos prácticos, el número de canastas o transacciones
 puede llegar hasta los miles o millones de millones de transacciones, y
 el número de artículos puede ser de miles o decenas de miles.
 
@@ -117,7 +117,7 @@ DT::datatable(canastas_conteo %>% head(n = 100) %>%
 ```
 
 Hay algunas canastas (principalmente canastas que contienen un solo
-artículo) que aparecen con frecuencia considerable (alrededor de 1\% o 2\%), pero las canastas están bastante dispersas en el espacio de posibles 
+artículo) que aparecen con frecuencia considerable (alrededor de $1\%$ o $2\%$), pero las canastas están bastante dispersas en el espacio de posibles 
 canastas (que es gigantesco: ¿puedes calcularlo?). Debido a esta dispersión (las canastas
 se distribuyen de manera rala en el espacio de posibles canastas), este análisis es
 de utilidad limitada.
@@ -126,7 +126,7 @@ de utilidad limitada.
 **Datos de canastas**
 
 1. El tamaño de las canastas normalmente es chico 
-  (por ejemplo 1 a 30 artículos distintos).
+  (por ejemplo de $1$ a $30$ artículos distintos).
 2. El número total de artículos típicamente no es muy grande (de cientos a cientos de miles, por ejemplo).
 3. El número de canastas puede ser mucho mayor (en algunos casos miles de millones) y quizá no pueden leerse completas en memoria.
 4. La mayoría de los artículos ocurre con frecuencias relativamente bajas, aunque unos cuantos
@@ -164,8 +164,8 @@ Considera las canastas {1,2,3}, {1,2}, {2,4}, {2,3}. ¿Cuáles son los itemsets 
 #### Ejemplo {-}
 Explicamos más adelante la función *apriori* de *arules*,
 pero por lo pronto podemos examinar algunos 
-conjuntos frecuentes de soporte mínimo 0.01 (como hay alrededor de 
-10000 canastas, esto significa que canastas que aparecieron al menos 100
+conjuntos frecuentes de soporte mínimo $0.01$ (como hay alrededor de 
+$10000$ canastas, esto significa que canastas que aparecieron al menos $100$
 veces durante el mes):
 
 ```{r, message = FALSE, results=FALSE}
@@ -177,7 +177,7 @@ ap <- apriori(lista_mb, parameter = pars)
 length(ap)
 ```
 
-Veamos algunos conjuntos frecuentes de tamaño 1:
+Veamos algunos conjuntos frecuentes de tamaño $1$:
 
 ```{r, message = FALSE, collapse = TRUE}
 ap_1 <- subset(ap, size(ap) == 1) 
@@ -185,7 +185,7 @@ length(ap_1)
 inspect(sort(ap_1, by='support')[1:10]) 
 ```
 
-Algunas de tamaño 2 y 3:
+Algunas de tamaño $2$ y $3$:
 
 ```{r, message = FALSE, collapse = TRUE}
 ap_2 <- subset(ap, size(ap) == 2)
@@ -227,7 +227,7 @@ indicios que contando de una menera inteligente puede ser posible encontrar **to
 itemsets frecuentes de cualquier orden.
 
 #### Ejemplo {-}
-Si reducimos el soporte a 0.0001 (que implica prácticamente que queremos contar todos
+Si reducimos el soporte a $0.0001$ (que implica prácticamente que queremos contar todos
 los itemsets que ocurren), obtenemos:
 
 ```{r gigante}
@@ -235,15 +235,17 @@ pars_2 <- list(supp = 0.0001, target='frequent itemsets', maxtime = 0, maxlen = 
 ap_todos <- apriori(lista_mb, parameter = pars_2)
 ```
 
-Entonces el número de itemsets que obtenemos (longitud menor o igual a 5) es 
+Entonces el número de itemsets que obtenemos (longitud menor o igual a $5$) es 
+
 
 ```{r}
 length(ap_todos)
 ```
 
 que es órdenes de magnitud más grande que el conjunto de todas las transacciones. 
-En este ejemplo chico, el cálculo de esta colección (hasta canastas de tamaño 7) 
-puede requerir hasta unos 4Gb de memoria (8Gb no son suficientes para encontrar los de tamaño 8, 9 y 10).
+
+En este ejemplo chico, el cálculo de esta colección (hasta canastas de tamaño 6) 
+puede requerir hasta unos 4Gb de memoria (8Gb no son suficientes para encontrar los de tamaño $8$, $9$ y $10$).
 Puedes ver entonces que para conjuntos de transacciones masivos, **contar todos los itemsets generalmente será un proceso muy lento si no es que más bien infactible**.
 
 
@@ -261,7 +263,7 @@ suponemos que
 - La lista de transacciones es muy grande, y
 no puede leerse completa en memoria,
 - Sin embargo, para una sola canasta, es posible calcular de manera
-relativamente rápida todos los subconjuntos de tamaño $k$ (para $k=1,2,3,4$, por ejemplo). Por ejemplo, si una canasta tiene 10 artículos, hay $\binom{10}{3}$ subcanastas
+relativamente rápida todos los subconjuntos de tamaño $k$ (para $k=1,2,3,4$, por ejemplo). Por ejemplo, si una canasta tiene $10$ artículos, hay $\binom{10}{3}$ subcanastas
 de tamaño 3, $\binom{10}{3} = 210$. Calcular estos subconjuntos es relativamente rápido comparado con leer de disco una transacción.
 - Finalmente, suponemos que el número de itemsets frecuentes es relativamente chico, debido
 a que el número de articulos que son más frecuentes es relativamente bajo
@@ -299,11 +301,11 @@ Kahneman](https://en.wikipedia.org/wiki/Conjunction_fallacy): Linda is 31 years 
     2. Linda is a bank teller and is active in the feminist movement. 
 
 #### Ejemplo {-}
-En nuestro ejemplo anterior, el número total de itemsets de tamaño 2 es
+En nuestro ejemplo anterior, el número total de itemsets de tamaño $2$ es
 ```{r}
 length(subset(ap_todos, size(ap_todos) == 2))
 ```
-Comparamos con los pares frecuentes caundo el soporte es 1\%:
+Comparamos con los pares frecuentes caundo el soporte es $1\%$:
 ```{r}
 length(subset(ap, size(ap) == 2))
 ```
@@ -313,7 +315,7 @@ una diferencia de casi dos ordenes de magnitud.
 
 Para entender cómo aplicamos monotonicidad, consideremos cómo calcularíamos los pares frecuentes.
 
-1. Primero calculamos los artículos frecuentes (itemsets de tamaño 1), que
+1. Primero calculamos los artículos frecuentes (itemsets de tamaño $1$), que
 son los artículos que aparecen en al menos una proporción $s$ de las canastas. 
   - (Contar candidatos) Esto requiere recorrer el archivo de transacciones y contar **todos** los artículos. 
   - (Podar) Examinamos los conteos y seleccionamos aquellos artículos que son frecuentes.
@@ -367,8 +369,8 @@ WHERE A.item1 = B.item1, A.item2 < B.item2
 ```
 
 donde es crucial que los itemsets estén ordenados (por índice o
-lexicográficamente). Finalmente, checamos que todos los subconjuntos de tamaño 2 de 
-cada subconjunto de tamaño 3 está en $C_2$, y filtramos.
+lexicográficamente). Finalmente, checamos que todos los subconjuntos de tamaño $2$ de 
+cada subconjunto de tamaño $3$ está en $C_2$, y filtramos.
 
 - Hay también distintas maneras de calcular $C_t$ para cada transacción. El 
 paper original sugiere una estructura de árbol para encontrar los
@@ -426,7 +428,7 @@ prob_cp/prob_p
 
 Como discutimos arriba, intentar estimar esta conjunta usando simples
 conteos de canastas no funciona, pues hay $2^n$ posibles canastas,
-e incluso cuando $n$ no es tan grande (por ejemplo 200) es un número
+e incluso cuando $n$ no es tan grande (por ejemplo $200$) es un número
 gigantesco. Tenemos dos caminos (o una combinación de ellos): podemos hacer hipótesis acerca de esta conjunta (y checar si son apropiadas), 
 o concentrarnos en estimar solamente algunas de sus características.
 
@@ -528,7 +530,7 @@ ggplot(df_sims, aes(x=Var1, y=Freq)) + geom_point() +
 
 Y vemos claramente que el modelo simple está lejos de ajustar los datos que observamos en
 las canastas de *Groceries*. Hay muchas más combinaciones frecuentes de tamaño
-2 y 3 de lo que esperaríamos si los artículos se compraran independientemente, y
+$2$ y $3$ de lo que esperaríamos si los artículos se compraran independientemente, y
 esto indica asociaciones positivas entre artículos que nos gustaría descubrir.
 ¿Cómo podemos distinguir esas asociaciones?
 
@@ -564,7 +566,7 @@ Con este propósito podemos organizar la información de los itemsets frecuentes
 en términos de reglas de asociación. 
 Un ejemplo de una regla de asociación es:
 
-*Entre las personas que compran leche y pan, un 40\% compra también yogurt*
+*Entre las personas que compran leche y pan, un $40\%$ compra también yogurt*
 
 ```{block2, type='resumen'}
 Una **regla de asociación** es una relación de la forma $I\to j$, donde
@@ -588,7 +590,7 @@ antecedente).
 ### Ejemplo {-}
 
 En nuestro ejemplo anterior, el soporte de  {whole milk,yogurt} es 
-de 0.0560, el soporte de {whole milk} es 0.2555, así que la confianza
+de $0.0560$, el soporte de {whole milk} es $0.2555$, así que la confianza
 de la regla $whole milk \to yogurt$ es $\frac{0.0560}{0.2555}=$ `r round(0.0560/0.255,2)`
 
 ---
@@ -677,7 +679,7 @@ de itemsets frecuentes no es muy apropiado para buscar estas reglas, pues precis
 
 - El valor del lift también puede escribirse (deméstralo) como
 $$ \frac{\hat{P}(I\cup\{j\})}{\hat{P}(I)\hat{P}({j})},$$
-Cuando los artículos son independientes, esta cantidad está cercana a 1. Es una medida de qué tan lejos de independencia están
+Cuando los artículos son independientes, esta cantidad está cercana a $1$. Es una medida de qué tan lejos de independencia están
 la ocurrencia de los itemsets $I$ y $j$. 
 
 
@@ -754,13 +756,14 @@ a error de estimación. Los valores más grandes de lift generalmente son sobree
 - Si regresamos a incrementar soporte y confianza, potencialmente perdemos reglas interesantes.
 
 
- 
+
 Veamos cómo se comportan confianza y lift para el modelo donde no hay asociaciones. 
 Utilizamos el **modelo de independencia** que explicamos arriba. 
 
 Obsérvese
 que en este modelo *todas las confianzas teóricas son iguales a la frecuencia del consecuente, y
-todos los valores teóricos de lift son 1*:
+todos los valores teóricos de lift son $1$*:
+
 
 ```{r}
 sims_reglas <- lapply(1:10, function(i){
@@ -892,7 +895,7 @@ reglas <- agregar_hyperlift(reglas, Groceries)
 length(reglas)
 ```
 
-Vemos que podemos cortar niveles de hyper-lift donde obtenemos reglas
+Vemos que podemos cortar niveles de *hyper-lift* donde obtenemos reglas
 de soporte relativamente alto. 
 
 ```{r}
@@ -911,7 +914,7 @@ length(filtradas_hl)
 length(filtradas_lift)
 ```
 
-Vemos que las reglas cortadas con hyperlift tienen mejores valores 
+Vemos que las reglas cortadas con *hyper-lift* tienen mejores valores 
 de soporte
 
 ```{r, fig.width=4, fig.asp=1}
@@ -920,8 +923,10 @@ qqplot(quality(filtradas_hl)$support,
        ylab = 'Filtro Lift', main = 'Soporte')
 ```
 
-Sin embargo, la distribución de valores de lift no es tan diferente, de forma que esta
+
+Sin embargo, la distribución de valores de *lift* no es tan diferente, de forma que esta
 medida de calidad no se degrada en el conjunto de reglas que encontramos:
+
 
 ```{r, fig.width=4, fig.asp=1}
 qqplot(quality(filtradas_hl)$lift, 
@@ -930,11 +935,12 @@ qqplot(quality(filtradas_hl)$lift,
        ylab = 'Filtro Lift', main = 'Lift')
 ```
 
-En resumen, al utilizar *hyper-lift* para filtrar reglas en lugar de *lift*:
+En resumen, al utilizar *hyper-lift* para filtrar reglas en lugar de *lift* obtenemos reglas de mejor calidad:
 
 - Descartamos más reglas de soporte bajo que tienen lift alto por azar.
 - Los valores de soporte de las reglas tienden a ser más altos.
 - Los valores de *lift* son comparables
+
 
 
 ## Selección de reglas
@@ -976,7 +982,7 @@ reglas_1 <- apriori(lista_mb, parameter = pars)
 ```
 
 Esta elección de parámetros resulta en `r length(reglas_1)`. 
-Podemos ordenar por hyper-lift:
+Podemos ordenar por *hyper-lift*:
 
 ```{r}
 plotly_arules(reglas_1, colors=c('red','gray'))
@@ -987,13 +993,13 @@ DT::datatable(DATAFRAME(sort(reglas_1, by='hyper_lift')) %>%
 ```
 
 **Observaciones**: conforme bajamos en esta tabla (ordenada por soporte), las estimaciones
-de confianza y lift son menos precisas.
+de confianza y *lift* son menos precisas.
 
 ## Búsqueda de reglas especializadas
 
-Otra manera de usar este análisis es intenando buscar asociaciones más fuertes (lift o hyper-lift más alto),
+Otra manera de usar este análisis es intenando buscar asociaciones más fuertes (*lift* o *hyper-lift* más alto),
 aún cuando sacrificamos soporte. Por su naturaleza, este tipo de análisis puede resultar
-en reglas más ruidosas (malas estimaciones de confianza y lift), pero es posible filtrar valores
+en reglas más ruidosas (malas estimaciones de confianza y *lift*), pero es posible filtrar valores
 más altos de estas cantidades para encontrar reglas útiles.
 
 Comenzamos con un soporte y confianza más bajas
@@ -1007,7 +1013,7 @@ b_reglas <- apriori(lista_mb, parameter = pars)
 b_reglas <- agregar_hyperlift(b_reglas, lista_mb)
 ```
 
-Y ahora filtramos con valores más grandes de hyper-lift. Podemos
+Y ahora filtramos con valores más grandes de *hyper-lift*. Podemos
 filtrar adicionalmente con lhs.support para obtener reglas que
 aplican con más frecuencia:
 
@@ -1029,9 +1035,9 @@ Tener una visión amplia del market basket analysis es difícil (típicamente, f
 que puedan ser útiles). Así que muchas veces ayuda visualizar los pares con asociación alta:
 
 - Construimos todas las reglas con un antecedente y un consecuente.
-- Filtramos las reglas con hyper-lift relativamente alto (por ejemplo > 1.5, pero hay que experimentar).
-- Representamos como una gráfica donde los nodos son artículos, y las aristas son relaciones de lift alto.
-- Usamos algún algoritmo para representar gráficas basado en fuerza, usando como peso el lift.
+- Filtramos las reglas con *hyper-lift* relativamente alto (por ejemplo > $1.5$, pero hay que experimentar).
+- Representamos como una gráfica donde los nodos son artículos, y las aristas son relaciones de *lift* alto.
+- Usamos algún algoritmo para representar gráficas basado en fuerza, usando como peso el *lift*.
 
 
 
