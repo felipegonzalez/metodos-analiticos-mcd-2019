@@ -21,7 +21,7 @@ para escalar datos grandes. El enfoque del curso se concentra más en el entendi
 ## Temario {-}
 
 1. Análisis de conjuntos frecuentes
-2. Simlitud: búsqueda de elementos similares (minhashing) 
+2. Similitud: búsqueda de elementos similares (minhashing) 
 3. Similitud: Hashing sensible a la localidad (Locality sensitive hashing)
 4. Procesamiento de flujos de datos: filtrado, conteo.
 5. Sistemas de recomendación
