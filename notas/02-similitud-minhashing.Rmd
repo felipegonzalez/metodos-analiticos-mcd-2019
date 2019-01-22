@@ -549,6 +549,28 @@ h_1("abcdef")
 h_2("abcdef")
 ```
 
+Otra opción es utilizar como función básica otra función hash probada, como *murmur32*
+o *xxhash32* (la segunda es más rápida que la primera), que también pueden
+recibir semillas para obtener distintas funciones:
+
+```{r}
+set.seed(123)
+generar_xxhash <- function(){
+    r <- as.integer(stats::runif(1, 1, 2147483647))
+    funcion_hash <- function(x){
+        hash_hex <- digest(x, algo = "xxhash32", seed = r, serialize = FALSE)
+        # convertir a entero, evitar overflow
+        strtoi(substr(hash_hex, 2, 8), 16)
+    }
+    funcion_hash
+}
+h_1 <- generar_xxhash()
+h_2 <- generar_xxhash()
+h_1("abcdef")
+h_2("abcdef")
+```
+
+
 ## Minhashing
 
 Ahora podemos proponer una implementación para minhashing, utilizando el
@@ -569,7 +591,8 @@ textos_df$data[[1]]
 Y ahora modificamos nuestro algoritmo
 
 ```{r}
-hash_f <- map(1:12, ~ generar_hash())
+set.seed(19922)
+hash_f <- map(1:20, ~ generar_xxhash())
 calc_firmas_hash <- function(textos_df, hash_f, n){
     num_hashes <- length(hash_f)
     firmas <- matrix(Inf, ncol = n, nrow = num_hashes)
@@ -586,6 +609,7 @@ calc_firmas_hash <- function(textos_df, hash_f, n){
     firmas
 }
 firmas <- calc_firmas_hash(textos_df, hash_f, n = 4)
+# firmas minhash
 firmas
 ```
 
