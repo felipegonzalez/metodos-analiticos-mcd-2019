@@ -20,9 +20,3 @@ pero si tienes problemas de reproducibilidad puedes intentarlo.
 ```
 gcr.io/metodos-analiticos-clase/ma-rstudio@sha256:9a36c845fbf2761baa3b76dc69c259e8dcd255dc18d252d9c1c5c32aca4ad9c7
 ```
-
-Canal de Slack
----
-
-https://join.slack.com/t/maestriaencie-re79200/shared_invite/enQtNTIyNTE0MDU1MTM2LTU0ODU2YWE1NGQ1MmNmMTljOWQwOWFlNWRiOGIyZGVhNjAzN2U1YjFmYTFjYzEyZjEyNWQ1MjNmMzJjMjYzOWM
-
