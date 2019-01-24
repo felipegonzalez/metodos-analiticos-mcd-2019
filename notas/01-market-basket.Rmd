@@ -116,8 +116,8 @@ DT::datatable(canastas_conteo %>% head(n = 100) %>%
     mutate_if(is.numeric, funs(round(., 4))))
 ```
 
-Hay algunas canastas (principalmente canastas que contienen un solo
-artículo) que aparecen con frecuencia considerable (alrededor de $1\%$ o $2\%$), pero las canastas están bastante dispersas en el espacio de posibles 
+Hay algunas canastas (principalmente canastas que contienen solo
+un artículo) que aparecen con frecuencia considerable (alrededor de $1\%$ o $2\%$), pero las canastas están bastante dispersas en el espacio de posibles 
 canastas (que es gigantesco: ¿puedes calcularlo?). Debido a esta dispersión (las canastas
 se distribuyen de manera rala en el espacio de posibles canastas), este análisis es
 de utilidad limitada.
@@ -257,7 +257,7 @@ Como discutimos arriba en las características de los datos de canastas,
 el número de transacciones puede ser muy grande (hasta miles de millones), las canastas típicamente
 son chicas, y el número de artículos distintos puede ir de las decenas
 hasta cientos de miles o algunos millones. Los algoritmos que se utilizan
-están diseñado para tratar con estas características. En particular,
+están diseñados para tratar con estas características. En particular,
 suponemos que 
 
 - La lista de transacciones es muy grande, y
@@ -282,15 +282,15 @@ itemsets frecuentes.
 que no sea frecuente.
 ```
 
-Este hecho, junto con la selección de un soporte mínimo para los itemsets frecuentes
+Este hecho, junto con la selección de un soporte mínimo para los itemsets frecuentes,
 es el que hace que la búsqueda y conteo de itemsets frecuentes sea un problema
-**factible**, pues podemos descartar una gran cantidad de artículos o itemsets *a priori* de manera simple, y es no es necesario contar todo.
+**factible**, pues podemos descartar una gran cantidad de artículos o itemsets *a priori* de manera simple, y no es necesario contar todo.
 
 La demostración es como sigue: Sea $n(I)$  el número de canastas
-que contiene $I$, y supongamos que $n(I)>s$ ($I$ es un conjunto frecuente).
+que contiene $I$, y supongamos que $\tfrac{n(I)}{n}>s$ ($I$ es un conjunto frecuente).
 Sea ahora $J\subset I$. Entonces cualquier canasta que contiene los
 artículos de $I$ contiene también los artículos de $J$ (que son menos),
-de forma que $n(J)\geq n(I)$. Como $n(I)>s$, entonces $J$ es un conjunto
+de forma que $n(J)\geq n(I)$. Como $\tfrac{n(I)}{n}>s$, entonces $J$ es un conjunto
 frecuente.
 
 
@@ -305,7 +305,7 @@ En nuestro ejemplo anterior, el número total de itemsets de tamaño $2$ es
 ```{r}
 length(subset(ap_todos, size(ap_todos) == 2))
 ```
-Comparamos con los pares frecuentes caundo el soporte es $1\%$:
+Comparamos con los pares frecuentes cuando el soporte es $1\%$:
 ```{r}
 length(subset(ap, size(ap) == 2))
 ```
@@ -370,7 +370,7 @@ WHERE A.item1 = B.item1, A.item2 < B.item2
 
 donde es crucial que los itemsets estén ordenados (por índice o
 lexicográficamente). Finalmente, checamos que todos los subconjuntos de tamaño $2$ de 
-cada subconjunto de tamaño $3$ está en $C_2$, y filtramos.
+cada subconjunto de tamaño $3$ está en $L_2$, y filtramos.
 
 - Hay también distintas maneras de calcular $C_t$ para cada transacción. El 
 paper original sugiere una estructura de árbol para encontrar los
@@ -580,7 +580,7 @@ las canastas que incluyen al itemset $I$. La confianza siempre está entre 0 y 1
 **Observaciones**:
 
 - Por monotonicidad, si  $J$ es un conjunto de artículos más grande que $I$ (es decir $I\subset J$), entonces $n(J) \leq n(I)$: cualquier canasta que 
-contiene a $I$ también contiene a $J$, y puede haber algunas canastas que contienen a $I$ no contienen a $J$.
+contiene a $J$ también contiene a $I$, y puede haber algunas canastas que contienen a $I$ no contienen a $J$.
 
 - Bajo el modelo de items independientes, todas las confianzas satisfacen $P(I\to j)=P(j)$ (la confianza simplemente es la probabilidad de observar el artículo $j$, independientemente del
 antecedente).
