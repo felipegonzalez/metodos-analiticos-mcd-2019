@@ -116,8 +116,8 @@ DT::datatable(canastas_conteo %>% head(n = 100) %>%
     mutate_if(is.numeric, funs(round(., 4))))
 ```
 
-Hay algunas canastas (principalmente canastas que contienen un solo
-artículo) que aparecen con frecuencia considerable (alrededor de $1\%$ o $2\%$), pero las canastas están bastante dispersas en el espacio de posibles 
+Hay algunas canastas (principalmente canastas que contienen solo
+un artículo) que aparecen con frecuencia considerable (alrededor de $1\%$ o $2\%$), pero las canastas están bastante dispersas en el espacio de posibles 
 canastas (que es gigantesco: ¿puedes calcularlo?). Debido a esta dispersión (las canastas
 se distribuyen de manera rala en el espacio de posibles canastas), este análisis es
 de utilidad limitada.
