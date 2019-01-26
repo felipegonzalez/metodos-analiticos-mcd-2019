@@ -758,13 +758,14 @@ Por ejemplo, ¿cuáles son tweets similares al primero?
 similitudes <- map_dbl(1:ncol(firmas), ~ mean(firmas[, .x] == firmas[, 1]))
 indices <- which(similitudes > 0.4)
 length(indices)
-data_frame(tweet = tw[indices],
+similares <- data_frame(tweet = tw[indices],
            jacc_estimada = similitudes[indices]) %>%
-    arrange(jacc_estimada)
+    arrange(desc(jacc_estimada))
+DT::datatable(similares)
 ```
 
 
-## Minhash: algoritmo por dcumento.
+## Minhash: algoritmo por documento.
 
 En muchas implementaciones, se usa un algoritmo por documento, en lugar de por teja:
 
@@ -776,8 +777,8 @@ se toma el mínimo.
 - Estos mínimos (tantos como funciones hash haya) dan la firma del documento.
 
 Tiene la ventaja de no requerir preprocesamiento para hacer el índice de tejas,
-pues típicamente los datos están organizados por documentos. Para datos muy grandes,
-este preprocesamiento puede ser costoso.
+pues típicamente los datos están organizados por documentos. Para datos distribuidos grandes,
+el preprocesamiento necesario para aplicar el algoritmo por teja puede ser costoso.
 La desventaja es
 que recalculamos muchas veces la misma función hash para cada teja. Esta también
 es la implementación que se utiliza en [Spark](https://github.com/apache/spark/blob/v2.1.0/mllib/src/main/scala/org/apache/spark/ml/feature/MinHashLSH.scala).
@@ -1025,13 +1026,12 @@ Ahora podemos extraer los pares de similitud alta:
 extraer_pares <- function(candidatos, cubeta, docs, textos = NULL){
    enq_cubeta <- enquo(cubeta)
    enq_docs <- enquo(docs)
-   pares <- 
-    candidatos %>% 
+   pares <- candidatos %>% 
     mutate(pares = map(!!enq_docs, ~ combn(sort(.x), 2, simplify = FALSE))) %>%
     select(!!enq_cubeta, pares) %>% unnest %>% 
     mutate(a = map_int(pares, 1)) %>% 
     mutate(b = map_int(pares, 2)) %>% 
-    select(-pares) %>% select(-cubeta) %>% unique
+    select(-pares) %>% select(-!!enq_cubeta) %>% unique
    if(!is.null(textos)){
        pares <- pares %>% mutate(texto_a = textos[a], texto_b = textos[b])
    }
@@ -1051,7 +1051,7 @@ para agrupar textos con algún grupo de 2 minshashes iguales, podríamos hacer:
 ```{r}
 particion <- split(1:12, ceiling(1:12 / 2))
 particion
-separar_fun <- function(particion){
+separar_cubetas_fun <- function(particion){
     function(firma){
         map_chr(particion, function(x){
             prefijo <- paste0(x, collapse = '')
@@ -1060,11 +1060,11 @@ separar_fun <- function(particion){
         })
     }
 }
-sep_firma <- separar_fun(particion)
-sep_firma(firmas_df$firma[[1]])
+sep_cubetas <- separar_cubetas_fun(particion)
+sep_cubetas(firmas$firma[[1]])
 
 firmas_3 <- firmas %>% 
-    mutate(cubeta = map(firma, sep_firma)) %>% 
+    mutate(cubeta = map(firma, sep_cubetas)) %>% 
     select(-firma) %>% unnest
 firmas_3
 ```
