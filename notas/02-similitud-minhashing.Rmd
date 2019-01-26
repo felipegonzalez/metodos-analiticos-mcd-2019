@@ -738,7 +738,7 @@ gc_ruta <- "https://storage.googleapis.com/fifa_tweets/FIFA.csv"
 if(!file.exists(ruta)){
     download.file(gc_ruta, ruta)
 } else {
-    fifa <- read_csv("../datos/FIFA2.csv")
+    fifa <- read_csv("../datos/FIFA.csv")
 }
 tw <- fifa$Tweet
 tw[1:10]
