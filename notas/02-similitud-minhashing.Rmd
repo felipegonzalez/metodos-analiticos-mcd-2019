@@ -46,7 +46,7 @@ $$sim(A,B) = \frac{|A\cap B|}{|A\cup B|}$$
 Esta medida cuantifica qué tan cerca está la unión de $A$ y $B$ de su intersección. Cuanto más parecidos sean $A\cup B$ y $A\cap B$, más similares son los conjuntos. En términos geométricos, es el área de la intersección entre el área de la unión.
 
 #### Ejercicio {-}
-Calcula la similitud de jaccard entre los conjuntos $A=\{5,2,34,1,20,3,4\}$
+Calcula la similitud de Jaccard entre los conjuntos $A=\{5,2,34,1,20,3,4\}$
  y $B=\{19,1,2,5\}$
  
 
@@ -82,7 +82,7 @@ Los métodos que veremos aquí se aplican para varias representaciones:
 
 - La representación
 más simple es la bolsa de palabras, que es conjunto de palabras que contiene un
-documento. Podríamos comparar entonces documentos calculando la similitud de jaccard 
+documento. Podríamos comparar entonces documentos calculando la similitud de Jaccard 
 de sus bolsas de palabras (1-gramas)
 
 ```{r}
@@ -288,12 +288,12 @@ resultado simple pero sorprendente:
 Sea $\pi$ una permutación escogida al azar, y $a$ y $b$ dos columnas
 dadas. Entonces
 $$P(f_\pi(a) = f_\pi(b)) = sim(a, b)$$
-donde $sim$ es la similitud de jaccard basada en las tejas usadas.
+donde $sim$ es la similitud de Jaccard basada en las tejas usadas.
 
 Sean $\pi_1, \pi_2, \ldots \pi_n$ permutaciones escogidas al azar de
 manera independiente. Si $n$ es grande, entonces por la ley de los grandes números
 $$sim(a,b) \approx \frac{|\pi_j : f_{\pi_j}(a) = f_{\pi_j}(b)|}{n},$$
-es decir, la similitud de jaccard es aproximadamente la proporción 
+es decir, la similitud de Jaccard es aproximadamente la proporción 
 de elementos de las firmas que coinciden.
 ```
 
@@ -905,7 +905,7 @@ map(names(indices), ~ corpus_tweets[[.x]]$content)[1:5]
 ```
 
 
-¿Cuáles son las verdaderas distancias de jaccard? Por ejemplo,
+¿Cuáles son las verdaderas distancias de Jaccard? Por ejemplo,
 
 ```{r}
 jaccard_similarity(
@@ -922,7 +922,7 @@ jaccard_similarity(
 ```
 
 **Observación**: Una vez que calculamos los que tienen similitud
-aproximada > 0.4, podemos calcular la función de jaccard exacta
+aproximada > 0.4, podemos calcular la función de Jaccard exacta
 para los elementos similares resultantes.
 
 
@@ -942,7 +942,7 @@ pares  <- pairwise_compare(corpus_tweets[1:200], ratio_of_matches) %>%
 pares <- pares %>% filter(score > 0.20) %>% arrange(desc(score)) 
 ```
 
-Nótese que si tuviéramos 10 veces más tweets (una fracción todavía del conjunto completo) el número de comparaciones se multiplica por 100 aproximadamente.
+Nótese que si tuviéramos $10$ veces más tweets (una fracción todavía del conjunto completo) el número de comparaciones se multiplica por $100$ aproximadamente.
 En la siguiente parte veremos como aprovechar estos minhashes para hacer una
 búsqueda eficiente de pares similares.
 
@@ -972,7 +972,7 @@ elemento (calculando similitud de Jaccard original)
 Nótese que con este método hemos resuelto de manera aproximada nuestro problema 
 de encontrar pares similares. En la siguiente parte discutiremos cómo decidir
 si es o no una buena aproximación. Veremos también formas de diseñar las cubetas para obtener candidatos con la
-similitud que busquemos (por ejemplo, mayor a 0.5, mayor a 0.9, etc.). 
+similitud que busquemos (por ejemplo, mayor a $0.5$, mayor a $0.9$, etc.). 
 
 Antes veremos algunas posibilidades construidas a mano para lograr
 nuestro objetivo. Usaremos en estos la implementación del algoritmo por documento.
@@ -1014,7 +1014,7 @@ candidatos
 ```
 
 Y los candidatos de alta similud se extraen de estas cubetas
-que tienen más de 1 elemento. Son:
+que tienen más de $1$ elemento. Son:
 
 ```{r}
 candidatos$docs
@@ -1044,7 +1044,7 @@ DT::datatable(extraer_pares(candidatos, cubeta, docs, textos = textos_dup))
 
 Si quisiéramos capturar como candidatos pares de documentos con similitud
 más baja, podríamos pedir que coincidan solo algunos de los hashes. Por ejemplo,
-para agrupar textos con algún grupo de 2 minshashes iguales, podríamos hacer:
+para agrupar textos con algún grupo de $2$ minshashes iguales, podríamos hacer:
 
 
 
@@ -1096,7 +1096,7 @@ DT::datatable(extraer_pares(candidatos, cubeta, docs, textos = textos_dup) %>%
 
 ## Tarea {-}
 
-1. Calcula la similitud de jaccard de las cadenas "Este es el ejemplo 1" y "Este es el ejemplo 2", usando tejas de tamaño 3.
+1. Calcula la similitud de Jaccard de las cadenas "Este es el ejemplo 1" y "Este es el ejemplo 2", usando tejas de tamaño $3$.
 
 2. (Ejercicio de [@mmd]) Considera la siguiente matriz de tejas-documentos:
 
@@ -1110,9 +1110,9 @@ mat
 
   - Sin permutar esta matriz, calcula la matriz de firmas minhash usando las siguientes funciones
   hash: $h_1(x) = 2x+1\mod 6$, $h_2(x) = 3x+2\mod 6$, $h_3(x)=5x+2\mod 6$.
-Recuerda que $a\mod 6$ es el residuo que se obtiene al dividir a entre 6, por ejemplo $14\mod 6 = 2$, y usa la numeración de renglones comenzando en 0.
+Recuerda que $a\mod 6$ es el residuo que se obtiene al dividir a entre $6$, por ejemplo $14\mod 6 = 2$, y usa la numeración de renglones comenzando en $0$.
   - Compara tu resultado usando el algoritmo por renglón que vimos en clase,
-    y usando el algoritmo por columna (el mínimo hash de los números de renglón que tienen un 1).
+    y usando el algoritmo por columna (el mínimo hash de los números de renglón que tienen un $1$).
   - ¿Cuál de estas funciones hash son verdaderas permutaciones?
   - ¿Qué tan cerca están las similitudes de Jaccard estimadas por minhash de las verdaderas similitudes?
 
@@ -1120,10 +1120,10 @@ Recuerda que $a\mod 6$ es el residuo que se obtiene al dividir a entre 6, por ej
 de las tejas (que son cadenas de texto), en lugar de usar hashes de números enteros (número de renglón). Para lo siguiente, puedes usar la función *hash_string* del paquete *textreuse* (o usar la función  *pyhash.murmur3_32* de la librería *pyhash*):
 
  - Calcula valores hash de algunas cadenas como 'a', 'Este es el ejemplo 1', 'Este es el ejemplo 2'. 
- - Calcula los valores hash para las tejas de tamaño 3 de 'Este es el ejemplo 1'. ¿Cuántos valores obtienes?
+ - Calcula los valores hash para las tejas de tamaño $3$ de 'Este es el ejemplo 1'. ¿Cuántos valores obtienes?
  - Usa los números del inciso anterior para calcular el valor minhash del texto anterior. 
- - Repite para la cadena 'Este es otro ejemplo.', y usa este par de minhashes para estimar la similitud de jaccard (en general usamos más funciones minhash para tener una buena estimación, no solo una!).
-- Repite los pasos anteriores para  10 funciones minhash (puedes usar *minhash_generator* de *textreuse*, o usar distintas semillas para *pyhash.murmur3_32*, o algunas de las funciones que generan funciones hash que vimos en clase).
+ - Repite para la cadena 'Este es otro ejemplo.', y usa este par de minhashes para estimar la similitud de Jaccard (en general usamos más funciones minhash para tener una buena estimación, no solo una!).
+- Repite los pasos anteriores para  $10$ funciones minhash (puedes usar *minhash_generator* de *textreuse*, o usar distintas semillas para *pyhash.murmur3_32*, o algunas de las funciones que generan funciones hash que vimos en clase).
 
-4. Utiliza el código visto en clase para encontrar pares de similitud alta en la colección de tweets que vimos en clase. Utiliza unos 15 hashes para encontrar tweets casi duplicados. ¿Cuántos tweets duplicados encontraste?
+4. Utiliza el código visto en clase para encontrar pares de similitud alta en la colección de tweets que vimos en clase. Utiliza unos $15$ hashes para encontrar tweets casi duplicados. ¿Cuántos tweets duplicados encontraste?
 ¿Qué pasa si usas menos o más funciones hash?
