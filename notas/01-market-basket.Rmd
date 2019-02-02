@@ -919,8 +919,13 @@ de soporte
 
 ```{r, fig.width=4, fig.asp=1}
 qqplot(quality(filtradas_hl)$support, 
-       quality(filtradas_lift)$support, xlab = 'Filtro Hyper-lift',
-       ylab = 'Filtro Lift', main = 'Soporte')
+       quality(filtradas_lift)$support,
+       xlab = 'Filtro Hyper-lift',
+       ylab = 'Filtro Lift',
+       main = 'Soporte',
+       xlim=c(0,0.025),
+       ylim=c(0,0.025))
+abline(0,1,col='red')
 ```
 
 
@@ -932,7 +937,11 @@ medida de calidad no se degrada en el conjunto de reglas que encontramos:
 qqplot(quality(filtradas_hl)$lift, 
        quality(filtradas_lift)$lift,
        xlab = 'Filtro Hyper-lift',
-       ylab = 'Filtro Lift', main = 'Lift')
+       ylab = 'Filtro Lift',
+       main = 'Lift',
+       xlim=c(2.5,11.5),
+       ylim=c(2.5,11.5))
+abline(0,1,col='red')
 ```
 
 En resumen, al utilizar *hyper-lift* para filtrar reglas en lugar de *lift* obtenemos reglas de mejor calidad:
@@ -1117,7 +1126,7 @@ en [@esl], por ejemplo, sección 14.2.
 - Conceptos relacionados: si los artículos son palabras y las canastas documentos (tweets, por ejemplo), este tipo de análisis (una vez que eliminamos las palabras más
 frecuentes, que no tienen significado como artículos, preposiciones, etc.), 
 puede mostrar palabras que co-ocurren para formar conceptos relacionados
-(por ejemplo, )
+(por ejemplo, **AQUI FALTA ALGO**)
 
 - Plagiarismo: si los artículos son documentos y los canastas oraciones, el análisis de canastas puede encontrar documentos que contienen las mismas oraciones. Si varias canastas (oraciones) "contienen" los mismos 
 artículos (documentos), entonces esas oraciones son indicadores de plagio
