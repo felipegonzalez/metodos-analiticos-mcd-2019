@@ -18,7 +18,7 @@ Estos problemas no son triviales por dos razones:
 - Los elementos que queremos comparar muchas veces están naturalmente representados en espacios de dimensión alta, y es relativamente costoso comparar un par (documentos, imágenes, usuarios, rutas). Muchas veces es preferible construir una representación más compacta y hacer comparaciones con las versiones comprimidas.
 - Si la colección de elementos es grande ($N$), entonces el número de pares 
 posibles es del orden de $N^2$, y no es posible hacer todas las posibles comparaciones para encontrar los elementos similares (por ejemplo, comparar
-100 mil documentos, con unas 10 mil comparaciones por segundo, tardaría alrededor de 5 días).
+$100$ mil documentos, con unas $10$ mil comparaciones por segundo, tardaría alrededor de $5$ días).
 
 Si tenemos que calcular *todas* las similitudes, no hay mucho qué hacer. Pero
 muchas veces nos interesa encontrar pares de similitud alta, o completar tareas
@@ -89,7 +89,7 @@ de sus bolsas de palabras (1-gramas)
 tokenizers::tokenize_words(textos[1])
 ```
 
-- Podemos generalizar esta idea y pensar en n-gramas de palabras, que son sucesiones
+- Podemos generalizar esta idea y pensar en $n$-gramas de palabras, que son sucesiones
 de $n$ palabras que ocurren en un documento.
 
 ```{r}
@@ -97,7 +97,7 @@ tokenizers::tokenize_ngrams(textos[1], n = 2)
 ```
 
 
-- Otro camino es usar k-tejas, que son k-gramas de *caracteres*
+- Otro camino es usar $k$-tejas, que son $k$-gramas de *caracteres*
 
 ```{r, collapse= TRUE}
 # Esta es una implementación simple
@@ -136,7 +136,7 @@ caracteres sucesivos.
 Es importante escoger $k$ suficientemente grande, de forma que la probabilidad de que
 una teja particular ocurra en un texto dado sea relativamente baja. Si los textos
 son cortos, entonces basta tomar valores como $k=4,5$, pues hay un total de $27^4$ tejas
-de tamaño 4, y el número de tejas de un documento corto (mensajes, tweets) es mucho más bajo que
+de tamaño $4$, y el número de tejas de un documento corto (mensajes, tweets) es mucho más bajo que
 $27^4$ (nota: ¿puedes explicar por qué este argumento no es exactamente correcto?)
 
 Para documentos grandes, como noticias o artículos, es mejor escoger un tamaño más grande,
@@ -164,7 +164,7 @@ que veremos aquí aplica para estos dos casos.
 
 ## Reducción probablística de dimensión.
 
-La representación usual de k-tejas de documentos es una representación de dimensión alta: tenemos un vector tantas entradas como tejas, y cada entrada indica si la
+La representación usual de $k$-tejas de documentos es una representación de dimensión alta: tenemos un vector tantas entradas como tejas, y cada entrada indica si la
 teja está o no en el documento:
 
 ```{r}
@@ -214,7 +214,7 @@ el espacio de enteros.
 - Sea $\pi$ una permutación al azar de los renglones de la matriz.
 - Permutamos los renglones de la matriz tejas-documentos según $\pi$.
 - Definimos una nuevo descriptor, el **minhash** del documento: para cada documento (columna) $d$ de la matriz permutada, tomamos el entero $f_\pi (d)$ que da el 
-número del primer renglón que es distinto de 0.
+número del primer renglón que es distinto de $0$.
 
 #### Ejercicio {#ej1}
 
