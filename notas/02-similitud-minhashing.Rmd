@@ -29,7 +29,7 @@ problemas de forma escalable.
 ## Similitud de conjuntos
 
 Muchos de estos problemas de similitud se pueden pensar como 
-problemas de similitud entre conjuntos. Por ejemplo, los documentos son conjuntos de palabras, pares de palabras, sucesiones de caracteres, etc,
+problemas de similitud entre conjuntos. Por ejemplo, los documentos son conjuntos de palabras, pares de palabras, sucesiones de caracteres,
 una película como el conjunto de personas a las que le gustó, o una ruta
 como un conjunto de tramos, etc.
 
