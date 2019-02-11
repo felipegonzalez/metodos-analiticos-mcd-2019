@@ -389,6 +389,7 @@ Abajo veremos cómo hacerlo con el paquete *textreuse*, por ejemplo.
 Repetimos el análsis de arriba usando textreuse:
 
 ```{r}
+library(textreuse)
 options("mc.cores" = 4L)
 # esta es la función que vamos a usar:
 tokenize_sp <- function(x) str_split(x, ' ', simplify = TRUE)
@@ -686,9 +687,8 @@ lo mismo (hacer LSH), bajo otras medidas de distancia. Veamos las característic
 
  1. Cuando la distancia entre dos elementos $x,y$ es baja (similitud alta),
  entonces $f(x)=f(y)$ tiene probabilidad alta.
- 2. Podemos escoger varias funciones  $f_1,\ldots,f_k$ con la propiedad anterior, de manera independiente, de forma que es posible calcular
- la probabilidad de $f_1(x)=f_1(y)$ y $f_2(x)=f_2(y)$, y eventos
- combinados de este tipo.
+ 2. Podemos escoger varias funciones  $f_1,\ldots,f_k$ con la propiedad anterior, de manera independiente, de forma que es posible calcular (o acotar)
+ la probabilidad de $f_i(x)=f_i(y)$ .
  3. Las funciones tienen que ser relativamente fáciles de calcular (comparado con calcular todos los posibles pares y sus distancias directamente).
  
  
@@ -716,7 +716,7 @@ $d_2$, entonces, la probabilidad de que sean mapeados al mismo valor es baja.
 Podemos ver una gráfica:   
 
 
-```{r}
+```{r, echo = FALSE}
 x_1 <- seq(0, 1, 0.01)
 x_2 <- seq(2, 3, 0.01)
 y_1 <- -1*x_1 + 2.5
@@ -853,9 +853,9 @@ es $(d_1,d_2, (180-d_1)/180, d_2/180)$
 Vamos a dar un argumento del cálculo: supongamos que el ángulo entre $x$ y $y$ es $d=\theta$, es decir,
 la distancia angular entre $x$ y $y$ es $\theta$.  
 
-Consideramos el plano $P$ que pasa por el origen por $x$ y $y$. 
+Consideramos el plano $P$ que pasa por el origen y por $x$ y $y$. 
 Si escogemos un vector al azar (cualquier dirección igualmente probable), el vector produce un hiperplano perpendicular (son
-los puntos $z$ talqes que $<z,v>=0$)
+los puntos $z$ tales que $<z,v>=0$)
 que corta al plano $P$
 en dos partes.
 Todas las direcciones de corte son igualmente probables, así
@@ -867,7 +867,7 @@ no separa a $x$ y $y$. Así que:
 
 1. $d(x,y)=d_1=\theta$, entonces $P(f(x)=f(y)) = d_1/180.$
 
-Por otra lado, 
+Por otro lado, 
 
 2. $d(x,y)=d_2$, entonces  $P(f(x)\neq f(y)) = 1-d_2/180.$
 
@@ -1108,11 +1108,10 @@ positivos y negativos que sean aceptables.
 
 ## Tarea {-}
 
-1. La tarea está en *scripts/lsh/entity-matching.Rmd*
+Ver 
 
-2. Si quieres hacer experimentos con el error en el cálculo de similitud
-por minhashing (y la diferencia entre permutaciones y hashes), puedes
-ver el script *scripts/lsh/notas_adicionales_minhash.nb.html* (o correr el Rmd
-asociado).
+1. Minhashing con spark *scripts/lsh/minhash_spark.Rmd*.
+2. Un ejercicio para encontrar artículos duplicados *scripts/lsh/entity-matching.Rmd*
+
 
 
