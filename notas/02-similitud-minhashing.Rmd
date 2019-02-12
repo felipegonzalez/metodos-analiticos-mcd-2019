@@ -162,7 +162,7 @@ sim_jaccard(tejas_doc[[4]], tejas_doc[[3]])
 que veremos aquí aplica para estos dos casos.
 
 
-## Reducción probablística de dimensión.
+## Reducción probablística de dimensión
 
 La representación usual de k-tejas de documentos es una representación de dimensión alta: tenemos un vector tantas entradas como tejas, y cada entrada indica si la
 teja está o no en el documento:
@@ -214,13 +214,13 @@ el espacio de enteros.
 - Sea $\pi$ una permutación al azar de los renglones de la matriz.
 - Permutamos los renglones de la matriz tejas-documentos según $\pi$.
 - Definimos una nuevo descriptor, el **minhash** del documento: para cada documento (columna) $d$ de la matriz permutada, tomamos el entero $f_\pi (d)$ que da el 
-número del primer renglón que es distinto de 0.
+número del primer renglón que es distinto de $0$.
 
 #### Ejercicio {#ej1}
 
 Considera la matriz de tejas-documentos para cuatro documentos y cinco tejas
 dada a continuación, con las permutaciones $(2,3,4,5,1)$ (indica que el renglón
-1 va al 2, el 5 al 1, etc.) y $(2,5,3,1,4)$. Calcula el descriptor definido arriba.
+$1$ va al $2$, el $5$ al $1$, etc.) y $(2,5,3,1,4)$. Calcula el descriptor definido arriba.
 
 ```{r, echo = FALSE}
 mat <- matrix(c(c(1,0,0,1), c(0,0,1,0), 
@@ -234,7 +234,7 @@ mat
 
 #### Ejemplo {-}
 
-Ahora regresamos a nuestro ejemplo de 4 textos chicos.
+Ahora regresamos a nuestro ejemplo de $4$ textos chicos.
 Por ejemplo, para una permutación tomada al azar:
 
 ```{r}
@@ -423,16 +423,16 @@ las permutaciones.
 
 
 ### Ejercicio{-}
-En nuestro ejemplo anterior, tenemos 107 tejas. Consideramos una funciones de
+En nuestro ejemplo anterior, tenemos $107$ tejas. Consideramos una funciones de
 la forma (como se sugiere en [@mmd]):
 
 $$h(x) = ax + b \bmod 107$$
 donde escogemos $a$ al azar entre 1 y 106, y $b$ se escoge al azar
-entre 0 y 106. ¿Por qué es apropiada una función de este tipo?
+entre $0$ y $106$. ¿Por qué es apropiada una función de este tipo?
 
 - Demuestra primero que
 la función $h(x)$ es una permutación de los enteros $\{ 0,1,\ldots, 106 \}$. Usa el
-hecho de que 107 es un número primo. 
+hecho de que $107$ es un número primo. 
 - Si escogemos $a, b$ al azar, podemos generar distintas permutaciones.
 - Esta familia de funciones no dan todas las posibles permutaciones, pero
 pueden ser suficientes para nuestros propósitos, como veremos más adelante.
@@ -478,7 +478,7 @@ hash_f[[2]](1:107) %>% duplicated %>% any
 
 
 
-Reescribimos nuestra función calc_firmas para usar las funciones
+Reescribimos nuestra función *calc_firmas* para usar las funciones
 hash en lugar de permutaciones:
 
 ```{r}
@@ -765,7 +765,7 @@ DT::datatable(similares)
 ```
 
 
-## Minhash: algoritmo por documento.
+## Minhash: algoritmo por documento
 
 En muchas implementaciones, se usa un algoritmo por documento, en lugar de por teja:
 
@@ -922,7 +922,7 @@ jaccard_similarity(
 ```
 
 **Observación**: Una vez que calculamos los que tienen similitud
-aproximada > 0.4, podemos calcular la función de Jaccard exacta
+aproximada $>$ $0.4$, podemos calcular la función de Jaccard exacta
 para los elementos similares resultantes.
 
 
