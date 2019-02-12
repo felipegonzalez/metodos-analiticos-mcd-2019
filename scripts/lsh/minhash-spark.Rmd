@@ -25,6 +25,8 @@ filtrado <- read_lines_chunked("../../datos/similitud/wiki-100000.txt",
                     skip = 1, callback = ListCallback$new(limpiar))
 ```
 
+Los datos completos están [aquí](https://s3.amazonaws.com/wiki-large/article_categories_en.ttl)
+
 Consideramos los datos ya tokenizados (los tokens son las categorías):
 
 ```{r}
