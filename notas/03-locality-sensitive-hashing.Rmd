@@ -53,8 +53,8 @@ es $1-s^r$
 5. Finalmente, la probabilidad de que estos dos documentos sean un par candidato es $1-(1-s^r)^b$, que es la probabilidad de que coincidan en al menos una banda.
 
 ```{block2, type="resumen"}
-Si la similitud de jaccard de dos documentos es $s$, la probabilidad
-de que sean un par candidato es igual a $$1-(1-s^r)^b.$$
+Si la similitud de Jaccard de dos documentos es $s$, la probabilidad
+de que sean un par candidato es igual a $$1-(1-s^r)^b$$.
 ```
 
 
@@ -198,7 +198,7 @@ más cómputo.
 6. Examinar las firmas de cada par candidato y determinar si 
 la fracción de coincidencias sobre todos los minhashes es satisfactorio.
 Alternativamente (más preciso), calcular directamente la similitud 
-de jaccard a partir de las tejas originales. 
+de Jaccard a partir de las tejas originales. 
 
 
 Alternativamente, podemos:
@@ -731,7 +731,7 @@ ggplot(dat_g, aes(x=x, y=y)) + geom_point(size=0.5) +
   labs(x = 'Distancia', y ='Probabilidad de candidato')
 ```
 
-### Distancia jaccard
+### Distancia Jaccard
 
 Supongamos que tenemos dos documentos $x,y$. Si ponemos por ejemplo
 $d_1=0.2$ y $d_2= 0.5$, tenemos que 
