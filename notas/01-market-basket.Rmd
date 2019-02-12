@@ -1125,8 +1125,7 @@ en [@esl], por ejemplo, sección 14.2.
 
 - Conceptos relacionados: si los artículos son palabras y las canastas documentos (tweets, por ejemplo), este tipo de análisis (una vez que eliminamos las palabras más
 frecuentes, que no tienen significado como artículos, preposiciones, etc.), 
-puede mostrar palabras que co-ocurren para formar conceptos relacionados
-(por ejemplo, **AQUI FALTA ALGO**)
+puede mostrar palabras que co-ocurren para formar conceptos relacionados.
 
 - Plagiarismo: si los artículos son documentos y los canastas oraciones, el análisis de canastas puede encontrar documentos que contienen las mismas oraciones. Si varias canastas (oraciones) "contienen" los mismos 
 artículos (documentos), entonces esas oraciones son indicadores de plagio
