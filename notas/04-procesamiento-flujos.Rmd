@@ -779,6 +779,7 @@ hash_gen <- function(seed){
   function(x){
     hash_32 <- digest::digest(x, 'xxhash32', serialize = FALSE, seed = seed) 
     # Covertimos a bits, tomando de dos en dos:
+    # Esta implementación es lenta
     sapply(seq(1, nchar(hash_32), 2), function(x) substr(hash_32, x, x+1)) %>%
         strtoi(16L) %>% as.raw %>% rawToBits()
   }
@@ -1052,8 +1053,7 @@ La implementación de hyperloglog en Spark se puede utilizar con el siguiente c�
 
 ```{r}
 library(sparklyr)
-sc <- spark_connect(master = "local")
-# esto normalmente no lo hacemos desde R
+sc <- spark_connect(master = "local") # esto normalmente no lo hacemos desde R
 df_tbl <- copy_to(sc, df %>% select(num_distintos, id))
 df_tbl %>%
   summarise(unicos_hll = approx_count_distinct(id)) # error estándar relativo 0.05
