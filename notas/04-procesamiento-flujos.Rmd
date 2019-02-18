@@ -1,0 +1,1060 @@
+# Procesamiento de flujos
+
+En esta parte supondremos que los datos se pueden representar como un flujo de tal velocidad y volumen que típicamente no es posible almacenar en memoria todo el flujo, o más en general, que para nuestros propósitos sería lento hacer 
+queries a la base de datos resultante. Veremos técnicas simples para obtener resúmenes simples y rápidos de flujos grandes, y también veremos cómo aplicar métodos probabilísticos para filtrar o resumir ciertos aspectos de estos flujos.
+
+Ejemplos de flujos que nos interesan son: logs generados por visitas y transacciones en sitios de internet, datos de redes de sensores, 
+o transacciones en algún sistema.
+
+Para analizar flujos con estas propiedades podemos hacer:
+
+- Restricción temporal: considerar ventanas de tiempo, y hacer análisis sobre los últimos datos en la ventana. Datos nuevos van reemplazando a datos anteriores, y puede ser que los datos anteriores no se respaldan (o es costoso acceder a ellos).
+
+- Resúmenes acumulados: guardamos resúmenes de los datos que podemos actualizar y utilizar para calcular características de interés en el sistema, por ejemplo: conteos simples, promedios. Algunos resúmenes son más difíciles de hacer eficientemente: por ejemplo, número de elementos únicos del flujo.
+
+- Muestreo probabilístico: Podemos diseñar muestras apropiadas para estimar cantidades que nos interesen, y sólo guardar los datos que corresponden a la muestra.
+
+- Filtrado: cómo retener para análisis elementos del flujo que satisfagan alguna propiedad de interés.
+
+
+
+## Selección de muestras y funciones hash
+
+Dependiendo de qué nos interesa medir en un flujo podemos decidir cuáles
+son las unidades que es necesario muestrear. Típicamente la unidad de un
+flujo no corresponde a las unidades que nos interesan. Por ejemplo: en *logs*
+de sitios web, las unidades observamos en el flujo son transacciones muy granulares (clicks, movimientos de mouse, envío de datos, etc.), pero nos interesa obtener
+propiedades a nivel de usuario, o sesión, etc.
+
+Dependiendo de las unidades de muestreo apropiadas que nos
+interesen (por ejemplo, clientes o usuarios, transacciones, etc.)
+podemos diseñar distintas estrategias.
+
+### Ejemplo {-}
+Si nos interesa estimar el promedio del tamaño de las transacciones en una ventana de tiempo dada, podemos muestrar esa ventana. Cada vez que llega una transacción, usamos un número aleatorio para decidir si
+lo incluimos en la muestra o no, y luego hacer nuestro análisis
+con las unidades seleccionadas.
+
+
+```{r, message = FALSE, warning = FALSE}
+library(tidyverse)
+```
+
+```{r, echo=FALSE, message=FALSE}
+theme_set(theme_bw())
+cb_palette <- c("#000000", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
+```
+
+
+```{r}
+generar_trans <- function(...){
+  id_num <- sample.int(10000, 1)
+  monto <- rt(1, df = 5, ncp = 5000) 
+  trans <- list(id = id_num, monto = monto)
+  trans
+}
+```
+
+Ahora simulamos un flujo y calculamos la mediana, con todos los datos:
+
+```{r}
+set.seed(312)
+trans <- map(1:100000, generar_trans) 
+total_montos <- map_dbl(trans, "monto")
+median(total_montos)
+```
+
+
+Si queremos seleccionar un 1\% de las transacciones para hacer más rápido
+nuestro cálculo, podemos seleccionar al azar para cada elemento si lo
+incluímos en la muestra o no, por ejemplo:
+
+
+```{r}
+seleccionar_rng <- function(prop = 0.01){
+   runif(1) < prop
+}
+trans_filtradas <- keep(trans, ~ seleccionar_rng(prop = 0.01))
+length(trans_filtradas)
+trans_filtradas %>% map_dbl("monto") %>% median
+```
+
+Este esquema simple no funciona bien cuando nuestra unidad de análisis
+no corresponde a las unidades del flujo, como en este ejemplo. ¿Puedes dar ejemplos?
+
+---
+
+
+
+### Ejemplo {-}
+
+Ahora supongamos que queremos estimar el promedio de la 
+transacción máxima *por cliente*  en una ventana de tiempo dada. 
+En este caso, la unidad de muestreo más simple es el cliente, y el 
+método del ejemplo anterior es menos apropiado. Quisiéramos en lugar de eso
+tomar una muestra de clientes en la ventana, tomar el máximo de todas sus 
+transacciones, y luego promediar. 
+
+- En este caso, el análisis es más complicado si seleccionamos cada transacción 
+según un número aleatorio (pues en la muestra resultante
+distintos clientes tendrán distintas probabilidades de inclusión, dependiendo
+de cuántas transacciones hagan en la ventana de tiempo).
+
+```{block2, type ='resumen'}
+Podemos usar una función hash del **identificador único de cliente**, y mapear
+con una función hash
+a un cierto número de cubetas $1,\ldots, B$. Los clientes de la muestra son los 
+que caen en las cubetas $1,2,\ldots, k$, y así
+obtendríamos una muestra que consiste de $k/B$ de los clientes
+totales que tuvieron actividad en la ventana de interés. Almacenamos todas
+las transacciones en la ventana de interés para los clientes seleccionados.
+```
+
+Con esta estrategia:
+
+- Todos los clientes que tuvieron actividad en la ventana tienen la misma 
+probabilidad de ser seleccionados.
+- No es necesario buscar en una lista si el cliente está en la muestra seleccionada o no (lo cual puede ser lento, o puede ser que terminemos con muestras muy grandes o chicas).
+- Podemos escoger $k$ para afinar el tamaño de muestra que buscamos.
+- Este método incorpora progresivamente nuevos clientes a la lista muestreada. Por ejemplo, si la cantidad de clientes está creciendo,
+entonces el número de clientes muestreados crecerá de manera correspondiente. Podemos
+empezar escogiendo $A$ de $B$ cubetas (con $B$ grande), y si la muestra de cientes
+excede el tamaño planeado, reducir a $A-1$ cubetas, y así sucesivamente.
+
+Primero veamos el resultado cuando utilizamos todos los clientes de
+la ventana de tiempo:
+
+```{r}
+sprintf("Número de clientes: %i", length(unique(map_int(trans, "id"))))
+trans_df <- trans %>% bind_rows() 
+mediana_max <- trans_df %>% 
+  group_by(id) %>% 
+  summarise(monto_max = max(monto)) %>%
+  pull(monto_max) %>% median 
+sprintf("Mediana de máximo monto: %.1f", mediana_max)
+```
+
+¿Cómo funciona si quisiéramos usar una muestra? Usamos una función hash y 
+repartimos en 10 cubetas (deberíamos
+obtener alrededor del 10\% de los clientes). Seleccionamos una sola cubeta
+y usamos para resumir:
+
+```{r}
+seleccionar <- function(id){
+  ((28*id + 110) %% 117) %% 10  == 0
+}
+
+trans_filtradas <- keep(trans, ~ seleccionar(.x$id))
+sprintf("Número de clientes: %i", length(unique(map_int(trans_filtradas, "id"))))
+trans_df <- trans_filtradas %>% bind_rows() 
+mediana_max <- trans_df %>% 
+  group_by(id) %>% 
+  summarise(monto_max = max(monto)) %>%
+  pull(monto_max) %>% median 
+sprintf("Mediana de máximo monto: %.1f", mediana_max)
+```
+
+
+Sin embargo, esto no funciona si seleccionamos al azar las transacciones, obtenemos
+una mala estimación con sesgo alto:
+
+```{r}
+trans_filtradas <- keep(trans, ~ seleccionar_rng(prop = 0.10))
+length(trans_filtradas)
+trans_df <- trans_filtradas %>% bind_rows() 
+mediana_max_incorrecta <- trans_df %>% 
+  group_by(id) %>% 
+  summarise(monto_max = max(monto)) %>%
+  pull(monto_max) %>% median 
+sprintf("Mediana de máximo monto: %.1f", mediana_max_incorrecta)
+```
+
+**Observación**: 
+
+1. En este último ejemplo, para cada usuario sólo
+muestreamos una fracción de sus transacciones. En algunos casos, 
+no muestreamos el máximo, y esto produce que la estimación 
+esté sesgada hacia abajo.
+2. Para un enfoque más general (por ejemplo id's que son cadenas), podemos
+usar alguna función hash de digest (ver ejemplos más abajo).
+
+## Selección de muestra bajo identificadores fijos.
+
+En algunos casos, podemos tener un conjunto $S$ de unidades
+que seleccionamos con anterioridad (no necesariamente de forma aleatoria), 
+y quisiéramos seleccionar
+en la muestra los datos relacionados con elementos en ese conjunto.
+
+Por ejemplo, quizá nos interesaría muestrar las transacciones
+que se hacen en comercios donde han existido fraudes anterioremente,
+o quizá checar si un correo proviene de una dirección que está 
+en una whitelist (o blacklist).
+
+En estos ejemplo, 
+tenemos que checar contra la lista $S$ si seleccionamos un elemento o no, a
+diferencia de los ejemplos de arriba.
+Cuando la lista es muy grande, esta operación puede ser costosa. 
+Aquí veremos
+un método probabilístico (Bloom filters) que tiene ventajas en cuanto
+a memoria usada y velocidad de búsqueda, con la penalización de posibles
+falsos positivos.
+
+### Ejemplos {-}
+
+
+- En este ejemplo de [Medium](https://blog.medium.com/what-are-bloom-filters-1ec2a50c68ff) 
+se usan filtros de Bloom para evitar volver a recomendar artículos ya
+vistos o recomendados.
+
+- [Este es un ejemplo](https://gallery.shinyapps.io/087-crandash/) de una
+aplicación que cuenta el número de usuarios únicos que bajan paquetes de CRAN. Cada
+vez que hay una nueva descarga (transacción) debemos decidir si se trata
+de usuarios nuevos o no y actualizar correctamente el conteo de usuarios únicos.
+
+- Supongamos que tenemos un diccionario de palabras $S$ del español.
+Cuando observamos una nueva "palabra" que alguien escribió,
+queremos saber si la palabra está en el diccionario. Por ejemplo,
+para decidir si es un posible error de ortografía o proponer algún sustituto.
+
+- Decidir si una dirección web está en una lista negra, para dar una advertencia
+inmediata (*safe browsing*).
+
+- Evitar procesos duplicados en pipelines de datos, como en 
+[este ejemplo](https://cloud.google.com/blog/products/gcp/after-lambda-exactly-once-processing-in-cloud-dataflow-part-2-ensuring-low-latency)
+
+
+---
+
+Una solución a este problema es el *filtro de Bloom*, que es
+un esquema probabilístico para filtrar elementos de un flujo
+que pertenecen a una colección fija $S$.
+
+## Filtro de Bloom
+
+Consideremos entonces el problema de filtrar de un flujo solamente los elementos 
+que pertenezcan a un conjunto $S$.
+
+Un filtro de Bloom consiste de:
+
+- Un conjunto $\Omega$ de posibles valores (el universo) que pueden aprecer en el flujo
+- Un subconjunto $S\subset \Omega$
+ de valores que están en la muestra de interés.
+- Un vector $v$ de $n$ bits, originalmente igual a 0.
+- Una colección de funciones hash $h_1,h_2,\ldots, h_k$ escogidas al azar,
+que mapean elementos de $\Omega$ a $n$ cubetas de $1$ a $n$ (posiciones
+en el vector de bits).
+ 
+Y el problema es que queremos decidir si un elemento 
+nuevo $\omega\in \Omega$ está o no en el
+conjunto $S$.
+
+
+### Ejemplo {-}
+
+
+#### Paso 1: inicialización y selección de hashes {-}
+
+Usaremos un vector de tamaño $n=11$ (longitud de vector de bits), y suponemos
+que los valores posibles ($\Omega$) son los enteros de uno a mil. Queremos
+detectar cuando observamos algún elemento de $S=\{15,523,922\}$. Para este
+ejemplo usamos $k=2$ funciones hash. Estas funciones deben mapear
+los enteros del uno al mil a las cubetas 1 a 11 (el número de entradas del
+ vector de bits). 
+
+```{r}
+S <- c(15, 523, 922)
+hash_f <- list(h_1 = function(x) x %% 11 + 1,
+                   h_2 = function(x) (5*x + 3) %% 11 + 1)
+```
+
+Inicializamos el vector de bits:
+
+```{r}
+v <- integer(11)
+```
+
+
+#### Paso 2: insertar elementos en filtro {-}
+
+Para cada elemento de $S$, calculamos los dos hashes, y ponemos en TRUE
+las dos posiciones dadas por estos hashes:
+
+```{r}
+for(i in 1:length(S)){
+  indices <- map_dbl(hash_f, ~ .x(S[i]))
+  print(indices)
+  v[indices] <- 1
+  print(v)
+}
+```
+
+Y tenemos el vector del filtro listo:
+```{r}
+v
+```
+
+#### Paso 3: filtrar elementos {-}
+
+Ahora veamos cómo decidimos cuáles elementos están o no en el conjunto $S$. Si
+observamos un nuevo número $x$, calculamos sus hashes, y vemos si esas
+posiciones están prendidas en el vector $v$. Si no lo están, entonces el
+elemento necesariamente no está en el conjunto $S$:
+
+```{r}
+z <- 219
+h_z <- map_dbl(hash_f, ~.x(z))
+h_z
+```
+
+No está en la lista, pues por lo menos uno de los bits es igual a cero:
+
+```{r, warning=FALSE}
+v[h_z]
+all(v[h_z])
+```
+
+Para cualquier número en la colección, todas las posiciones de sus hashes tienen
+el valor $1$:
+
+```{r, warning=FALSE}
+z <- 523
+h_z <- map_dbl(hash_f, ~.x(z))
+all(v[h_z])
+```
+
+Sin embargo, puede haber falsos positivos (números que no están en la colección 
+$S$ cuyos dos hashes dan posiciones en $1$):
+
+```{r, warning=FALSE}
+z <- 413
+h_z <- map_dbl(hash_f, ~.x(z))
+all(v[h_z])
+```
+
+**Observaciones**: 
+
+- Nótese que solo es necesario almacenar el vector de bits
+y las funciones hash, y esto generalmente resulta en una representación 
+compacta que se puede mantener en memoria.
+
+- La propiedad más importante es que cualquier elemento en la colección 
+siempre da un verdadero positivo (detectamos correctamente los que están
+en la colección $S$). Es rápido descartar elementos que no están en la 
+colección (alguno de los bits de su hash está apagado) - no hay falsos negativos.
+
+- Por otra parte, tendremos algunos falsos positivos, que tenemos
+que controlar (probabilidad baja). En la mayoría de los casos, si el filtro
+está bien diseñado, cuando intentemos recuperar elementos que dan positivo
+en el filtro vamos a encontar el elemento.
+
+- Agregar elementos al filtro y checar los bits para un nuevo elemento
+son operaciones relativamente eficientes (depende del número de hashes
+y es posible paralelizar).
+
+- No es posible eliminar elementos de un filtro de Bloom (¿por qué?).
+
+## Análisis de filtro de Bloom
+
+
+Para construir este filtro, tenemos que escoger el tamaño del vector de bits ($n$),
+y el número de funciones hash $k$, dependiendo
+del número de elementos que tenemos que almacenar. De estas dos contidades,
+y del tamaño del conjunto $S$, depende la tasa de falsos positivos.
+
+Supongamos como aproximación que una función hash, al aplicar a una $x$ dada,
+selecciona
+una de las entradas del vector de bits con la misma probabilidad. 
+La probabilidad de que un
+bit dado no se encienda cuando insertamos un elemento es entonces
+$$1-\frac{1}{n}$$.
+Si $k$ es el número de funciones hash escogidas independientemente, 
+entonces la probabilidad de que ese bit dado no se encienda es
+$$\left (1-\frac{1}{n}\right )^k$$.
+Si insertamos los $s$ elementos de $S$, la probabilidad de que ese bit dado
+no se encienda es entonces
+$$\left (1-\frac{1}{n}\right  )^{ks}$$.
+La probabilidad de que se encienda es
+$$1-\left (1-\frac{1}{n}\right )^{ks}$$.
+
+
+Finalmente podemos calcular la probabilidad de un falso positivo. Para un elemento
+que no está en $S$, la probabilidad de que todos sus hashes caigan en bits encendidos
+es
+
+$$ \left ( 1-\left (1-\frac{1}{n}\right )^{ks}\right )^k$$
+
+**Observaciones**:
+
+1. Si usamos un vector más grande ($n$ más grande), la probabildad de falsos
+positivos baja (el vector de bits tiene relativamente más ceros).
+2. Si el conjunto $S$ es más grande ($s$ más grande), la probabilidad de
+falsos positivos sube (el vector de bits está más lleno). Si insertamos 
+demasiados elementos en un filtro dado, éste se puede *saturar*, y resultar
+en una probabilidad alta de falso positivo.
+3. El número de hashes tiene dos efectos: por un lado, más hashes llenan más
+el vector de bits de unos. Por otro lado, es más difícil que un nuevo elemento
+"atine" a más posiciones que tienen un bit encendido.
+4. Esta fórmula es una aproximación, pues usamos funciones hash y no aleatorización.
+
+
+Podemos hacer una gráfica para ver cómo se comporta la tasa de falsos positivos:
+
+
+```{r, fig.width = 8}
+tasa_fp <- function(n, s, k) {
+    (1 - (1 - (1 / n)) ^ (k * s)) ^ k
+}
+df <- expand.grid(list(s = c(1e5, 1e6, 1e7, 1e8),
+        k = seq(1, 20),
+        n = 10 ^ seq(5, 9, by = 0.5))) %>%
+      mutate(mill_bits = round(n/1e6, 1)) %>%
+      mutate(tasa_falsos_p = tasa_fp(n, s, k)) %>%
+      mutate(s_str = paste0(s, ' insertados'))
+
+
+ggplot(df, aes(x = k, y = tasa_falsos_p, 
+  colour = factor(mill_bits), group = mill_bits)) + 
+  geom_line(size = 1.2) +
+  facet_wrap(~s_str) +
+  labs(x = "k = número de hashes", 
+       y =  "Proba de falso positivo",
+       colour = "Millones bits \n en vector") +
+  scale_y_sqrt(breaks = c(0.01,0.05,0.1,0.25,0.5,1)) 
+```
+
+
+Haciendo algunas aproximaciones, se puede demostrar que el número de hashes
+óptimo es aproximadamente
+$$k  = \frac{n}{s}\log(2)$$
+
+```{r, warning = FALSE}
+df_opt <- df %>% select(n, s) %>%  
+  mutate(k = ceiling((n/s)*log(2))) %>% unique %>%
+  mutate(tasa_falsos_p = tasa_fp(n, s, k)) %>%
+  mutate(s_str = paste0(s, ' insertados'))
+ggplot(df, aes(x = k, y = tasa_falsos_p)) +
+               geom_line(aes(colour=factor(mill_bits), group=mill_bits),
+                 size=1.2) +
+               facet_wrap(~s_str) +
+               labs(x="k = número de hashes", 
+                    colour = "Mill bits \n en vector") +
+               scale_y_sqrt(breaks = c(0.01,0.05,0.1,0.25,0.5,1)) +
+               geom_point(data = df_opt, col='red') +
+               xlim(0,20)
+  
+```
+```{block2, type='resumen'}
+Un filtro de bloom nunca da falsos negativos, pero puede dar falsos positivos.
+La tasa de falsos positivos se puede controlar escogiendo el tamaño del vector
+y el número adecuado de hashes dependiendo del tamaño esperado del conjunto
+que vamos a insertar.
+```
+
+## Ejemplo: un corrector de ortografía simple basado en filtro de Bloom
+
+```{r, message = FALSE}
+diccionario <- read_csv("../datos/diccionario/es_dic.txt", col_names = FALSE) %>% 
+          pluck("X1")
+# nota: el encoding del diccionario debe ser utf-8
+# diccionario <- iconv(diccionario, to = "UTF-8")
+m <- length(diccionario)
+m
+```
+
+Queremos insertar entonces unos 250 mil elementos, aunque puede ser posible
+que quizá queramos insertar otras palabras más adelante.
+
+```{r}
+df <- expand.grid(list(s = 300000,
+                  k = seq(4, 20),
+                  n = c(1e6, 2e6, 4e6, 6e6, 8e6)
+                  )) %>%
+      mutate(millones_bits = (n/1e6)) %>%
+      mutate(tasa_falsos_p = tasa_fp(n, s, k)) %>%
+      mutate(s_str = paste0(s, ' insertados'))
+
+
+ggplot(df, aes(x = k, y = tasa_falsos_p, 
+               colour=factor(millones_bits), group=millones_bits)) + 
+               geom_line(size=1.2) +
+               facet_wrap(~s_str) +
+               labs(x="k = número de hashes", 
+                    colour = "Mill bits \n en vector") +
+               scale_y_log10(breaks= c(0.0001, 0.001, 0.01, 0.1))
+```
+
+Podemos intentar usar un vector de 4 millones de bits con unos 6 hashes. Nuestra
+estimación de falsos positivos con 6 hashes es de
+
+```{r}
+n <- 4e6
+tasa_fp(n = n, s = 250000, k = 6)
+```
+
+Ahora necesitamos nuestras funciones hash escogidas al azar. Podemos
+usar el algoritmo [xxhash32](https://github.com/Cyan4973/xxHash), por ejemplo:
+
+```{r}
+library(digest)
+set.seed(18823)
+hash_generator <- function(k = 1, n){
+  seeds <- sample.int(652346, k)
+  hasher <- function(x){
+    sapply(seeds, function(s){
+      # en digest, serialize puede ser false, pues trabajamos con cadenas
+      # la salida de xxhash32 son 8 caracteres hexadecimales, pero 
+      # solo tomamos 7 para poder convertir a un entero
+      sub_str <- substr(digest::digest(x, "xxhash32", 
+        serialize = FALSE, seed = s), 1, 7)
+      strtoi(sub_str, base = 16L) %% n + 1
+    })
+  }
+  hasher
+}
+hashes <- hash_generator(5, n)  
+```
+
+```{r}
+hashes('él')
+hashes('el')
+hashes('árbol')
+```
+
+
+Una implementación del filtro de Bloom es como sigue:
+
+
+```{r}
+filtro_bloom <- function(num_hashes, n){
+    v <- raw(n)
+    hashes <- hash_generator(num_hashes, n)
+    insertar <- function(x){
+        v[hashes(x)] <<- as.raw(1)
+    }
+    en_filtro <- function(x){
+        all(as.logical(v[hashes(x)]))
+    }
+    vec <- function() v
+    filtro <- list(insertar = insertar, en_filtro = en_filtro, vec = vec)
+    filtro
+}
+```
+
+
+
+**Observación**:  Las funciones necesarias (insertar, buscar) son cortas, así
+que puedes hacer experimentos utilizándolas directamente en tu código
+(sin encapsular en un constructor como la función anterior).
+
+---
+
+Ahora creamos el filtro e insertamos los elementos del diccionario:
+
+```{r, cache = TRUE}
+# crear filtro
+set.seed(812)
+filtro_b <- filtro_bloom(num_hashes = 6, n = 4e6)
+# insertar palabras de diccionario
+system.time(
+    for(i in seq_along(diccionario)){
+        filtro_b$insertar(diccionario[i])
+    })
+```
+
+El tamaño del filtro es de
+
+```{r}
+format(object.size(filtro_b$vec()), units = "Mb")
+```
+
+
+Vemos unos ejemplos:
+
+```{r}
+filtro_b$en_filtro("arbol")
+```
+
+Como este valor es falso, la palabra *arbol* definitivamente no está en el diccionario
+original. 
+
+```{r}
+filtro_b$en_filtro("árbol")
+```
+
+Por otro lado, la palabra *árbol* prueba positivo. Puede ser un falso positivo,
+con probabilidad muy baja, como calculamos antes. Podemos calcular la exacta ahora que sabemos
+cuántos bits del filtro están ocupados. Primero, la proporción de bits ocupados es:
+
+```{r}
+v <- as.logical(filtro_b$vec())
+n <- length(v)
+ocupacion <- sum(as.logical(v))
+p <- ocupacion / n
+p
+```
+
+Y la probabilidad de que una palabra que no está en la lista sea un falso positivo
+es:
+
+```{r}
+p^6
+```
+
+Podemos hacer otras pruebas:
+
+```{r}
+palabras_prueba <- c('árbol', 'arbol', 'explicásemos', 'xexplicasemos',
+                     'gato', 'perror', 'error', 'perro', 'alluda','ayuda')
+df_palabras <- tibble(palabra = palabras_prueba) %>%
+                   mutate(pertenece = map_lgl(palabra, filtro_b$en_filtro))
+df_palabras
+```
+
+En el siguiente paso tendríamos que producir sugerencias de corrección.
+En caso de encontrar una palabra que no está en el diccionario,
+podemos producir palabras similares (a cierta distancia de edición),
+y filtrar aquellas que pasen el filtro de bloom (ver [How to write a spelling corrector](http://norvig.com/spell-correct.html)).
+
+```{r}
+generar_dist_1 <- function(palabra){
+  caracteres <- c(letters, 'á', 'é', 'í', 'ó', 'ú', 'ñ')
+  pares <- lapply(0:(nchar(palabra)), function(i){
+    c(str_sub(palabra, 1, i), str_sub(palabra, i+1, nchar(palabra)))
+  })
+  eliminaciones <- pares %>% map(function(x){ paste0(x[1], str_sub(x[2],2,-1))})
+  sustituciones <- pares %>% map(function(x)
+      map(caracteres, function(car){
+    paste0(x[1], car, str_sub(x[2], 2 ,-1))
+  })) %>% flatten 
+  inserciones <- pares %>% map(function(x){
+    map(caracteres, function(car) paste0(x[1], car, x[2]))
+  }) %>% flatten
+  transposiciones <- pares %>% map(function(x){
+    paste0(x[1], str_sub(x[2],2,2), str_sub(x[2],1,1), str_sub(x[2],3,-1))
+  })
+  c(eliminaciones, sustituciones, transposiciones, inserciones) %>% unlist
+}
+```
+
+```{r}
+generar_dist_1('perror') %>% keep(filtro_b$en_filtro)
+```
+
+```{r}
+generar_dist_1('explicasemos') %>% keep(filtro_b$en_filtro)
+```
+
+
+```{r}
+generar_dist_1('hayuda') %>% keep(filtro_b$en_filtro)
+```
+
+### Ejercicio {-}
+
+- Encuentra alguna palabra del español que no esté en el filtro (por ejemplo una
+de español en México). Agrégala al filtro y verifica que es detectada como
+positiva. Busca una posible manera incorrecta de escribirla y prueba la
+función de arriba de sugerencias.
+
+- Prueba usando un vector de bits mucho más chico (por ejemplo de 500 mil bits). 
+¿Qué tasa de falsos positivos obtienes?
+
+## Muestra distribuida uniformemente en el flujo.
+
+Supongamos que tenemos un histórico de tamaño $n_0$ del flujo de datos. Podemos tomar una muestra
+para resumir el flujo. El problema es que cuando llegan nuevos datos, si los incluimos desplazando datos anteriores entonces tendremos sesgo hacia actividad reciente. Una solución es hacer una especie de muestreo de rechazo.
+
+Supongamos entonces que queremos trabajar con una muestra de tamaño aproximado $k$, y que inicialmente
+tenemos una muestra uniforme del flujo de tamaño $n_0$.
+
+1. Tomamos una muestra uniforme de tamaño $k$ de los $n_0$ casos.
+2. Si observamos un nuevo caso cuando observamos el dato $n > n_0$,
+lo seleccionamos con probabilidad $\frac{k}{n}$. 
+3. Si el nuevo caso resulta seleccionado, escogemos al azar uno de los $k$ elementos anteriores y lo eliminamos.
+4. Repetimos para $n+1$.
+
+Como ejercicio, demostrar:
+
+###  Ejercicio {-}
+Al tiempo $n$, la probabilidad de que un elemento del flujo completo 
+esté en la muestra es uniforme $k/n$
+
+### Ejemplo {-}
+Consideramos $k=100$, y observamos un flujo sintético dado como sigue:
+
+```{r}
+N <- 100000
+n_0 <- 1000
+set.seed(103)
+lambda <- 10*abs(sin(1:N/200)) 
+datos <- data_frame(n = 1:N, res = rnorm(N)) %>% mutate(obs = cumsum(res))
+ggplot(datos %>% filter(n < n_0), aes(x = n, y = obs, colour = factor((n_0 - n) < 50))) +
+  geom_line()
+```
+
+Si utilizamos una ventana reciente de tamaño 50, nuestras estimaciones del estado del sistema 
+están sesgadas a los últimos valores.
+
+Sin embargo, si aplicamos el esquema mostrado arriba:
+
+
+```{r}
+muestra_unif <- function(datos_ini, k){
+  n <- length(datos_ini)
+  muestra <- sample(datos_ini, k)
+  seleccion <- function(dato){
+    n <<- n + 1
+    if(runif(1) < k/n) {
+      muestra[sample.int(k, 1)] <<- dato
+    }
+    mean(muestra)
+  }
+  media <- function(){
+      mean(muestra)
+  }
+  list(seleccion = seleccion, media = media)
+}
+set.seed(8128324)
+muestra_u <- muestra_unif(datos_ini = datos$obs[1:100], k = 50)
+muestra_u$media()
+```
+
+Ahora observamos el flujo y vamos agregando y rechazando:
+
+```{r}
+datos_p <- datos %>% filter(n >= 101, n < 5000) %>%
+  mutate(promedio_muestra = map_dbl(obs, muestra_u$seleccion))
+```
+
+Y observamos que nuestro esquema da una buena estimación de la media
+total para cada $n$:
+
+```{r}
+datos_p %>%
+  mutate(promedio_total = cummean(obs)) %>%
+  gather(variable, valor, obs:promedio_total) %>% 
+  ggplot(aes(x = n, y = valor, colour = variable)) + geom_line()
+```
+
+## Contando elementos diferentes en un flujo.
+
+Supongamos que queremos contar el número de elementos diferentes que aparecen 
+en un flujo, por ejemplo, cuántos usuarios únicos tiene un sitio (según
+un identificador como login o ip, por ejemplo).
+
+Como antes, si el número de elementos distintos no es muy grande, podemos
+usar una estructura eficiente en memoria (como un diccionario o tabla hash) para procesar
+cada elemento nuevo del flujo, decidir si es nuevo, agregarlo a la estructura,
+y contar. Sin embargo, si el número de elementos distintos es grande, esta
+estrategia puede requierir mucha memoria y procesamiento. Un filtro de bloom 
+no es del todo adecuado, pues confrome vayamos
+llenando de 1´s el su vector, la tasa de falsos positivos irá incrementando (en el 
+límite es 1).
+
+Una alternativa es usar algoritmos probabilísticos, que utilicen mucha menos
+memoria, siempre y cuando aceptemos cierto error de estimación.
+
+### El algoritmo de Flajolet-Martin
+
+Este es uno de los primeros algoritmos para atacar este problema, y se basa
+en el uso de funciones hash. La referencia básica es este (paper)[http://algo.inria.fr/flajolet/Publications/FlFuGaMe07.pdf], [@Flajolet]
+
+```{block2, type='resumen'}
+La idea básica del algoritmo de Flajolet-Martin se basa en la siguiente observación:
+
+  Si escogemos funciones hash que mapeen elementos del conjunto del flujo a 
+una sucesión de bits suficientemente grande, conforme haya más elementos distintos
+en el flujo observaremos más valores hash distintos, y en consecuencia, es más
+probable observar sucesiones de bits con características especiales.
+
+La característica especial que se explota en este algoritmo es el número
+de ceros que hay al final de las cadenas de bits.
+```
+
+
+### Ejemplo {-}
+Consideramos una función hash (para cadenas):
+```{r}
+hash_gen <- function(seed){
+  function(x){
+    hash_32 <- digest::digest(x, 'xxhash32', serialize = FALSE, seed = seed) 
+    # Covertimos a bits, tomando de dos en dos:
+    sapply(seq(1, nchar(hash_32), 2), function(x) substr(hash_32, x, x+1)) %>%
+        strtoi(16L) %>% as.raw %>% rawToBits()
+  }
+}
+set.seed(5451)
+hash_1 <- hash_gen(seed = 123)
+hash_2 <- hash_gen(seed = 564)
+hash_1("7yya4071872aa")
+```
+
+Y ahora hacemos una función para contar el número 0's consecutivos
+en la cola de esta representación:
+
+```{r}
+tail_length <- function(bits){
+  bits %>% which.max - 1  
+}
+hash_1("7yya4071872aa") %>% tail_length
+```
+
+La idea es que conforme veamos más elementos distintos, es más probable observar
+que la cola de ceros es un número más grande. Como la función hash que usamos
+es determinista, los elementos ya vistos no contribuyen a hacer crecer a este número.
+
+### Discusión {-}
+
+Antes se seguir, hacemos la siguiente observación: Si consideramos
+los bits de cada nuevo elemento como aleatorios: 
+
+- La probabilidad de
+que observemos una cola de 0's de tamaño **al menos** $m$ es $2^{-m}$, para $m \geq 1$ 
+
+- Supongamos
+que tenemos una sucesión de $n$ candidatos del flujo distintos. La probabilidad de
+que *ninguno* tenga una cola de ceros de tamaño mayor a $m$ es igual a
+\begin{equation}
+(1-2^{-m})^{n}
+(\#eq:probacola)
+\end{equation}
+
+Que también es la probabilidad de que el máximo de las colas sea menor
+a $m$. Reescribimos como
+
+
+$$((1-2^{-m})^{2^m})^{\frac{n}{2^{m}}}. $$
+
+
+Ahora notamos que la expresión de adentro se escribe (si $m$ no es muy chica) como
+$$P(max < m) = (1-2^{-m})^{2^m} = (1-1/t)^t\approx e^{-1}\approx 0.3678$$ 
+
+- Si $n$ es mucho más grande que $2^m$, entonces la expresión \@ref(eq:probacola) es chica,
+y tiende a $0$ conforme $n$ crece.
+- Si $2^m$ es mucho más grande que $n$, entonces la expresión \@ref(eq:probacola) es cercana
+a $1$, y tiende a $1$ conforme $m$ crece.
+
+- Así que para una sucesión de $n$ elementos distintos, es poco probable observar que
+la longitud $m$ de la máxima cola de 0's consecutivos es tal que $2^m$ es mucho más grande que $n$ o mucho más chica que $n$. Abajo graficamos unos ejemplos:
+
+```{r}
+proba_cola <- function(distintos, r){
+  #proba de que el valor máximo de cola de 0's sea r
+  al_menos_r <- 1- (1-0.5^r) ^ distintos 
+  no_mas_de_r <- 1 - (1-0.5 ^ {r+1}) ^ distintos
+  prob <-  al_menos_r - no_mas_de_r 
+  prob
+}
+df_prob <- data_frame(n = c(2^5, 2^10, 2^20)) %>%
+  mutate(probas = map(n, function(n){ 
+    m <- 1:30
+    probas <- sapply(m, function(x){proba_cola(n, x)})
+    tibble(m = m, probas = probas)
+    })) %>%
+  unnest
+ggplot(df_prob, aes(x = 2^m, y = probas, colour = factor(n))) + geom_line() +
+   ylab("Probabilidad de máxima cola de 0s") +
+    scale_x_log10(breaks=10 ^ (1:7))
+c(2^5, 2^10, 2^20)
+```
+
+
+---
+
+Y ahora podemos probar cómo se ve la aproximación con dos funciones
+hash diferentes:
+
+
+```{r}
+n <- 1000
+tail_hash_1 <- compose(tail_length, hash_1)
+tail_hash_2 <- compose(tail_length, hash_2)
+df <- data_frame(num_distintos = 1:n) %>%
+      mutate(id = as.character(sample.int(52345678, n))) %>%
+      mutate(tail_1 = map_dbl(id, tail_hash_1)) %>%
+      mutate(tail_2 = map_dbl(id, tail_hash_2))
+df      
+```
+
+Y ahora calculamos el máximo acumulado
+
+```{r}
+df <- df %>% mutate(max_tail_1 = cummax(tail_1), max_tail_2 = cummax(tail_2))
+tail(df)
+```
+
+```{r}
+ggplot(df, aes(x = num_distintos, y = 2^max_tail_1)) + 
+  geom_abline(slope=1, xintercept = 0, colour = "red") + 
+  geom_point() +
+  scale_x_log10() + scale_y_log10()
+```
+
+```{r}
+ggplot(df, aes(x = num_distintos, y = 2^max_tail_2)) + 
+  geom_abline(slope=1, xintercept = 0, colour = "red") + 
+  geom_point() +
+  scale_x_log10() + scale_y_log10()
+```
+
+Nótese que las gráficas están en escala logarítmica, así que la estimación 
+no es muy buena en términos absolutos si usamos un solo hash. Sin embargo, 
+confirmamos que la longitud máxima de las colas de 0's crece con el número
+de elementos distintos en el flujo.
+
+## Combinación de estimadores, Hyperloglog
+
+Como vimos en los ejemplos anteriores, la estimación de Flajolet-Martin
+tiene dos debilidades: varianza alta, y el hecho de que el único resultado
+que puede dar es una potencia de 2.
+
+Podemos usar varias funciones hash y combinarlas de distintas maneras
+para obtener una mejor estimación con menos varianza. 
+
+- La primera idea, que puede ser promediar los valores obtenidos de varias
+funciones hash, requeriría muchas funciones hash por la varianza alta del estimador, 
+de modo que esta opción no es muy buena.
+En nuestro ejemplo anterior, la desviación estándar del estimador es:
+
+```{r}
+df_prob %>% group_by(n) %>%
+  mutate(media = sum((2^m)*probas)) %>%
+  summarise(desv_est = sqrt(sum(probas*(2^m-media)^2))) 
+```
+
+- Usar la mediana para evitar la posible variación grande de este estimador tiene
+la desventaja de que al final obtenemos una estimación de la forma $2^R$, que también
+tiene error grande.
+
+- Una mejor alternativa es utilizar la recomendación de [@mmd], que consiste
+en agrupar en algunas cubetas las funciones hash, promediar los estimadores $2^{R_i}$
+dentro de cada cubeta, y luego obtener la mediana de las cubetas.
+
+### Hyperloglog
+
+Esta solución (referida en el paper anterior, [@Flajolet]) es una de las más utilizadas y refinadas.
+En primer lugar:
+
+- Para hacer las cubetas usamos los mismos bits producidos por el hash (por ejemplo,
+los primeros $p$ bits). Usamos los últimos bits del mismo hash para calcular la longitud
+de las colas de 0's.
+- Usamos promedio armónico de los valores máximos de cada cubeta (más robusto
+a valores grandes y atípicos, igual que la media geométrica).
+- Intuitivamente, cuando dividimos en $m$ cubetas un flujo de $n$ elementos, cada flujo
+tiene aproximadamente $n/m$ elementos. Como vimos arriba, lo más probable
+es que la cola máxima en cada cubeta sea aproximadamente $\log_2(n/m)$. El promedio
+armónico $a$ de $m$ cantidades $(n/m)$ de esta cantidad entonces debería estar ser
+del orden en $n/m$, así que la estimación final de la cardinalidad del flujo
+completo es $ma$ (el número de cubetas multiplicado por el promedio armónico). 
+- Existen varias correcciones adicionales para mejorar su error en distintas circunstancias (dependiendo del número de elemntos únicos que estamos contando, por ejemplo). Una típica
+es multiplicar por 0.72 el resultado de los cálculos anteriores para corregir sesgo
+multiplicativo (ver referencia de Flajolet).
+
+Veamos una implementación **simplificada** (nota: considerar *spark* para hacer
+esto, que incluye una implementación rápida del hyperloglog), usando las funciones hash que construimos arriba.
+
+Primero construimos la función que separa en cubetas, y una nueva
+función para calcular la longitud de la cola una vez que quitamos los bits
+que indican la cubeta:
+
+```{r}
+cubeta_bits <- 5
+m <- 2^cubeta_bits
+tail_length_lead <- function(bits){
+  bits[-c(1:cubeta_bits)] %>% which.max %>% as.integer
+}
+hash_1("7yya40787")
+hash_1("7yya40787") %>% tail_length_lead
+cubeta <- function(bits){
+  paste0(as.character(bits[1:cubeta_bits]), collapse = "")
+}
+hash_1("7yya40787") %>% cubeta
+```
+
+Simulamos unos datos y calculamos la cubeta para cada dato:
+
+```{r}
+n <- 100000
+df <- data_frame(num_distintos = 1:n) %>%
+      mutate(id = as.character(sample.int(52345678, n, replace = FALSE))) %>%
+      mutate(hash = map(id, hash_1)) %>%
+      mutate(cubeta = map_chr(hash, cubeta))
+df
+```
+
+Y calculamos la longitud de la cola:
+
+```{r}
+df <- df %>% mutate(tail = map_int(hash, tail_length_lead))
+df      
+```
+
+Ahora vemos cómo calcular nuestra estimación. cuando hay 50 mil distintos, calculamos
+máximo por cubeta
+
+```{r}
+resumen_50 <- df %>% filter(num_distintos <= 50000) %>% 
+    group_by(cubeta) %>% 
+    summarise(tail_max = max(tail))
+resumen_50
+```
+
+Y luego calculamos la media armónica y reescalamos para obtener:
+
+```{r}
+armonica <- function(x) 1/mean(1/x)
+0.72 * m * armonica(2 ^ resumen_50$tail_max)
+```
+
+Y esta es nuestra estimación de únicos en el momento que el verdadero valor
+es igual a 50000.
+
+Podemos ver cómo se desempeña la estimación conforme nuevos únicos van llegando (el 
+siguiente cálculo son necesarias algunas manipulaciones para poder calcular
+el estado del estimador a cada momento);
+
+```{r}
+res <- df %>% spread(cubeta, tail, fill = 0) %>%
+        gather(cubeta, tail, -num_distintos, -id, -hash) %>%
+        select(num_distintos, cubeta, tail) 
+res_2 <- res %>% 
+      group_by(cubeta) %>%
+      arrange(num_distintos) %>%
+      mutate(tail_max = cummax(tail)) %>%
+      group_by(num_distintos) %>%
+      summarise(estimador_hll = 0.72*(m*armonica(2^tail_max)))
+ggplot(res_2 %>% filter(num_distintos > 100),
+       aes(x = num_distintos, y = estimador_hll)) + geom_line() +
+  geom_abline(slope = 1, colour ='red') 
+```
+
+
+Finalmente, examinamos el error relativo:
+
+```{r}
+quantile(1 - res_2$estimador_hll/res_2$num_distintos, probs=c(0.1, 0.5, .9))
+```
+
+
+**Observaciones**
+- Ver también [este paper](https://stefanheule.com/papers/edbt13-hyperloglog.pdf) para mejoras del hyperloglog (por ejemplo, si es posible es preferible usar
+hashes de 64 bits en lugar de 32).
+
+- El error relativo teórico del algoritmo (con algunas mejoras que puedes ver en los papers citados) es de $1.04/\sqrt{m}$, donde $m$ es el número de cubetas, así que más cubetas mejoran el desempeño.
+
+- Las operaciones necearias son: aplicar la función hash, calcular cubeta, y actualizar
+el máximo de las cubetas. La única estructura que es necesario mantener es
+los máximos de las colas dentro de cada cubeta. que se actualiza secuencialmente.
+
+### Implementación de spark 
+
+La implementación de hyperloglog en Spark se puede utilizar con el siguiente código:
+
+```{r}
+library(sparklyr)
+sc <- spark_connect(master = "local")
+# esto normalmente no lo hacemos desde R
+df_tbl <- copy_to(sc, df %>% select(num_distintos, id))
+df_tbl %>%
+  summarise(unicos_hll = approx_count_distinct(id)) # error estándar relativo 0.05
+```
