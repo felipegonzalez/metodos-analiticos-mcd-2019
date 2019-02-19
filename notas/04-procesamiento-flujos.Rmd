@@ -483,11 +483,11 @@ ggplot(df, aes(x = k, y = tasa_falsos_p,
                scale_y_log10(breaks= c(0.0001, 0.001, 0.01, 0.1))
 ```
 
-Podemos intentar usar un vector de 4 millones de bits con unos 6 hashes. Nuestra
+Podemos intentar usar un vector de 8 millones de bits con unos 6 hashes. Nuestra
 estimación de falsos positivos con 6 hashes es de
 
 ```{r}
-n <- 4e6
+n <- 8e6
 tasa_fp(n = n, s = 250000, k = 6)
 ```
 
@@ -529,9 +529,11 @@ filtro_bloom <- function(num_hashes, n){
     v <- raw(n)
     hashes <- hash_generator(num_hashes, n)
     insertar <- function(x){
+        x <- iconv(x, "utf-8")
         v[hashes(x)] <<- as.raw(1)
     }
     en_filtro <- function(x){
+        
         all(as.logical(v[hashes(x)]))
     }
     vec <- function() v
@@ -553,7 +555,7 @@ Ahora creamos el filtro e insertamos los elementos del diccionario:
 ```{r, cache = TRUE}
 # crear filtro
 set.seed(812)
-filtro_b <- filtro_bloom(num_hashes = 6, n = 4e6)
+filtro_b <- filtro_bloom(num_hashes = 6, n = 8e6)
 # insertar palabras de diccionario
 system.time(
     for(i in seq_along(diccionario)){
@@ -1058,3 +1060,11 @@ df_tbl <- copy_to(sc, df %>% select(num_distintos, id))
 df_tbl %>%
   summarise(unicos_hll = approx_count_distinct(id)) # error estándar relativo 0.05
 ```
+
+### Tarea
+
+- Resuelve los dos ejercicios pendientes (uno en filtro de Bloom, otro en las sección de muestras uniformemente distribuidas
+
+- Repetir la estimación del hyperloglog del ejemplo de clase aumentando a 250-500 mil elementos distintos. Puedes utilizar la implementación de spark. ¿Qué errror relativo
+obtuviste? Nota: puedes usar la implementación en R que vimos en clase, pero ojo: las funciones hash que utilizamos son relativamente lentas.
+
