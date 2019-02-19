@@ -1,0 +1,305 @@
+---
+title: "Tarea LSH: Entity matching"
+output: html_notebook
+---
+
+
+
+En este ejemplo veremos como usar LSH 
+para encontrar registros
+que se refieren al mismo elemento pero están en distintas tablas, 
+y pueden diferir en cómo están registrados (entity matching).
+
+## Datos
+
+Los [datos](https://dbs.uni-leipzig.de/de/research/projects/object_matching/fever/benchmark_datasets_for_entity_resolution) para este ejempo particular trata con dos fuentes bibliográficas (DBLP, ACM)
+de artículos y conferencias de cómputo. La carpeta del repositorio
+es datos/similitud/entity-matching. **El objetivo es parear las dos fuentes para
+identificar artículos que se presenteron en las dos referencias.**
+
+
+```{r, warning=FALSE, message=FALSE}
+library(tidyverse)
+acm <- read_csv('../../datos/similitud/entity_matching/ACM.csv')
+dbl <- read_csv('../../datos/similitud/entity_matching/DBLP2.csv')
+```
+
+```{r}
+head(acm)
+head(dbl)
+nrow(acm)
+nrow(dbl)
+```
+
+**Pregunta**: ¿si intentas una aproximación por fuerza bruta, cuántas comparaciones
+tendrías que hacer? Si cada tabla contuviera unos 2 millones de documentos, ¿sería
+factible hacer todas las posibles comparaciones?
+
+## Shingling y hashing
+
+Vamos a poner todos los documentos en una sola lista. Aunque al final
+encontremos elementos de la misma fuente en la misma cubeta, podemos
+filtrar estos. En este caso escogemos 24 hashes agrupados en 8 bandas, y 
+shingles de tamaño 4, y usamos sólo título y autor.
+
+```{r}
+acm_1 <- acm %>% select(id, title, authors) %>% 
+        mutate(texto = paste(title, authors, sep = "    ")) %>% 
+        mutate(origen = "ACM") %>% 
+        mutate(id = as.character(id))
+dbl_1 <- dbl %>% select(id, title, authors) %>% 
+         mutate(texto = paste(title, authors, sep = "    ")) %>% 
+         mutate(origen = "DBL")
+acm_dbl <- bind_rows(acm_1, dbl_1)
+```
+
+**Pregunta**: ¿por qué incluimos algún espacio en blanco entre título y autor?
+¿Qué otra estrategia se te ocurre para convertir en tejas?
+
+```{r}
+shingle_chars <- function(string, lowercase = TRUE, k = 4){
+  # produce shingles (con repeticiones)
+  if(lowercase) {
+    string <- str_to_lower(string)
+  }
+  shingles <- seq(1, nchar(string) - k + 1) %>%
+    map_chr(function(x) substr(string, x, x + k - 1))
+  shingles
+}
+```
+
+En este ejemplo podemos usar *textreuse*:
+
+```{r}
+library(textreuse)
+set.seed(88345)
+minhasher <- minhash_generator(24)
+nombres <- c(acm_1$id, dbl_1$id)
+texto <- c(acm_1$texto, dbl_1$texto)
+names(texto) <- nombres
+corpus <- TextReuseCorpus(text = texto,
+                          minhash_func = minhasher,
+                          tokenizer = shingle_chars, k = 4, lowercase = TRUE,
+                          progress = FALSE, skip_short = FALSE)
+
+```
+
+Construimos las firmas y calculamos cubetas:
+
+```{r}
+lsh_conf <- lsh(corpus, bands = 8) 
+lsh_conf
+```
+
+
+
+**Pregunta**: examina la tabla *lsh_conf*. ¿Qué significa cada columna?
+Describe cómo construimos en clase la columna *buckets*.
+
+*Buckets se calcula haciendo hash de la combinación de los hashes individuales
+de cada banda, para tener un código uniforme (queda más limpio, aunque no es
+necesario hacer esto)*
+
+**Pregunta**: Haz una gráfica mostrando qué porcentaje de cada nivel
+de similitud tiene probabilidad de ser capturado para este problema.
+¿Te parece satisfactoria la curva para este problema?
+Explica en qué casos esto sería razonable. Si consideras apropiado
+cambia estos número.
+
+```{r}
+graficar_curvas <- function(df_br, colour = TRUE){
+  r <- df_br$r
+  b <- df_br$b
+  curvas_similitud <- data_frame(b = b, r = r) %>%
+    group_by(r, b) %>%
+    mutate(datos = map2(r, b, function(r, b){
+          df_out <- data_frame(s = seq(0, 1, 0.01)) %>% 
+            mutate(prob = 1 - (1 - s ^ r) ^b)
+          df_out 
+          })) %>% unnest
+  graf_salida <- ggplot(curvas_similitud, aes(x = s, y = prob, 
+          colour = as.factor(interaction(b,r)))) +
+          geom_line(size=1.1) + 
+          labs(x = 'similitud', y= 'probablidad de ser candidato',
+          colour = 'b.r') 
+  if(colour){
+    graf_salida + scale_colour_manual(values = cb_palette)
+  }
+  graf_salida
+}
+df_br <- data_frame(r = 3, b = 8)
+graficar_curvas(df_br)
+```
+
+
+## Examinar pares candidatos
+
+Agrupamos cubetas y extraemos pares similares. En *textreuse* se puede
+hacer como sigue:
+
+```{r}
+candidatos <- lsh_candidates(lsh_conf)
+nrow(candidatos)
+```
+
+Calculamos también la similitud de jaccard exacta para cada par.
+
+```{r}
+candidatos <- lsh_compare(candidatos, corpus, jaccard_similarity)
+candidatos
+```
+
+**Pregunta**: explica cómo se calcula la columna *score* en la tabla de candidatos.
+
+*Se calcula usando la similitud de jaccard original*.
+
+```{r}
+candidatos <- candidatos %>% arrange(desc(score))
+candidatos
+```
+
+Podemos ver el contenido de un texto de esta manera:
+
+```{r}
+corpus[["181566"]]$content
+corpus[["journals/sigmod/MedeirosP94"]]$content
+```
+
+
+**Pregunta**: ¿Cuántas comparaciones tuviste qué hacer (cálculos de similitud)? Compara con el total
+de comparaciones que es posible hacer entre estas dos tablas.
+
+```{r}
+nrow(candidatos)
+```
+
+Ahora eliminamos candidatos que aparecieron en la misma tabla (misma referencia bibliográfica):
+
+
+```{r}
+candidatos <-  candidatos %>% left_join(acm_dbl %>% select(id, origen) %>% rename(a = id, origen_a = origen))
+candidatos <-  candidatos %>% left_join(acm_dbl %>% select(id, origen) %>% rename(b = id, origen_b = origen))
+candidatos_dif <- candidatos %>% filter(origen_a != origen_b)
+nrow(candidatos_dif)
+```
+
+
+**Pregunta**: 
+¿Cuántos pares candidatos obtuviste?
+Examina algunos elementos con similitud uno o cercana a uno. ¿Se refieren al
+mismo artículo en las dos fuentes? 
+
+Similitud 1:
+```{r}
+corpus[["181566"]]$content
+corpus[["journals/sigmod/MedeirosP94"]]$content
+```
+
+
+
+**Pregunta**: Ahora considera los elementos 
+con similitud más baja que capturaste. Examina varios casos y concluye
+si hay pares que no se refieren al mismo artículo, y por qué.
+
+similitud 0.6, son el mismo
+
+```{r}
+tail(candidatos_dif)
+corpus[["174639"]]$content
+corpus[["journals/tods/SalemGS94"]]$content
+```
+
+Similitud 0.05 - son  diferentes
+```{r}
+corpus[["174642"]]$content
+corpus[["conf/sigmod/Chong98"]]$content
+```
+
+
+**Pregunta**: propón un punto de corte de similitud para la tabla de arriba, según tus
+observaciones de la pregunta anterior.
+
+```{r}
+# código filtrando con score > tu_numero, y examinando los elementos
+# de similitud más baja
+candidatos_filt <- filter(candidatos_dif, score > 0.7)
+tail(candidatos_filt)
+```
+
+**Pregunta**: ¿cuántos pares candidatos obtuviste al final?
+
+```{r}
+nrow(candidatos_filt)
+```
+
+## Examinar pares candidatos
+
+
+
+**Pregunta** Evalúa tus resultados con las respuestas
+correctas, que están en la carpeta de los datos.
+
+
+```{r}
+mapping <- read_csv("../../datos/similitud/entity_matching/DBLP-ACM_perfectMapping.csv")
+```
+
+Crea variables apropiadas para hacer join de los verdaderos matches con tus candidatos:
+
+```{r}
+candidatos_filt <- candidatos_filt %>% mutate(idDBLP = ifelse(str_detect(a, "^[0-9]*$"), b, a))
+candidatos_filt <- candidatos_filt %>% mutate(idACM = ifelse(str_detect(a, "^[0-9]*$"), a, b))
+```
+
+Podemos calcular el número de pares verdaderos que son candidatos (recuperados), el número de pares
+candidatos que son candidatos pero no son pares verdaderos, por ejemplo:
+
+```{r}
+mapping <- mapping %>% mutate(idACM = as.character(idACM))
+ambos <- inner_join(candidatos_filt, mapping)
+nrow(candidatos_filt)
+nrow(ambos)
+```
+
+*Pregunta*: Evalúa precisión y recall de tu método. Para distintas aplicaciones que te
+puedas imaginar, ¿qué tan buenos son estos resultados?
+
+```{r}
+precision <- nrow(ambos)/nrow(candidatos_filt)
+precision
+recall <- nrow(ambos)/nrow(mapping)
+recall
+```
+
+
+## Análisis de errores
+
+Considera algunos casos que fallamos en recuperar como candidatos
+
+```{r}
+anti_join(mapping, candidatos_filt) %>% left_join(candidatos_filt)
+```
+
+```{r}
+a <- corpus[["375767"]]$content
+b <- corpus[["conf/sigmod/HernandezMHYHT01"]]$content
+a
+b
+```
+
+Si eliminamos todos los caracteres que no son a-z, podemos incrementar
+la similitud de estos dos documentos de un match, por ejemplo:
+
+```{r}
+jaccard_similarity(shingle_chars(a, 4), shingle_chars(b, 4))
+a_mod <- str_replace_all(a, "[^[A-Za-z\\s]]", "")
+b_mod <- str_replace_all(b, "[^[A-Za-z\\s]]", "")
+jaccard_similarity(shingle_chars(a_mod, 4), shingle_chars(b_mod, 4))
+
+```
+
+**Pregunta**: Considerando estos errores, ¿qué se te ocurre para mejorar el método?
+
+- Preprocesamiento para corregir acentos, normalizar más los textos.
+- Podemos usar más bandas con menos hashes para filtrar menos.
+
