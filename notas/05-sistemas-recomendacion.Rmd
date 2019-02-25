@@ -374,7 +374,7 @@ ser mala idea porque el sesgo hacia arriba puede ser alto, especialmente si la g
 es un sus niveles generales de calificaciones (hay muy barcos y muy estrictos).
 
 ### Ejemplo {#ejemplo}
-Los niveles generales de 10 personas:
+Los niveles generales de $50$ personas:
 
 ```{r}
 set.seed(128)
