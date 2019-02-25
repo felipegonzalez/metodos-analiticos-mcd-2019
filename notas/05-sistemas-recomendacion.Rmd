@@ -594,7 +594,7 @@ a $j$ que haya vista $i$, y ajustar la predicción según la calificación de es
 
 
 Tomamos entonces nuestra predicción
-base, que le llamamaos $x_{ij}^0$ y hacemos una nueva predicción:
+base, que le llamamos $x_{ij}^0$ y hacemos una nueva predicción:
 
 $$\hat{x}_{ij} = x_{ij}^0 + \frac{1}{k}\sum_{t \in N(i,j)} (x_{it} - x_{it}^0 )$$
 
