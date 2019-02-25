@@ -779,17 +779,19 @@ Consideramos una función hash (para cadenas):
 ```{r}
 hash_gen <- function(seed){
   function(x){
-    hash_32 <- digest::digest(x, 'xxhash32', serialize = FALSE, seed = seed) 
+    # hash_32 <- digest::digest(x, 'xxhash32', serialize = FALSE, seed = seed) 
     # Covertimos a bits, tomando de dos en dos:
     # Esta implementación es lenta
-    sapply(seq(1, nchar(hash_32), 2), function(x) substr(hash_32, x, x+1)) %>%
-        strtoi(16L) %>% as.raw %>% rawToBits()
+    #sapply(seq(1, nchar(hash_32), 2), function(x) substr(hash_32, x, x+1)) %>%
+    #    strtoi(16L) %>% as.raw %>% rawToBits()
+    # versión más rápida con hash_string
+    textreuse::hash_string(x) %>% bitwXor(seed) %>% intToBits()
   }
 }
 set.seed(5451)
-hash_1 <- hash_gen(seed = 123)
-hash_2 <- hash_gen(seed = 564)
-hash_1("7yya4071872aa")
+hash_1 <- hash_gen(seed = 123332233)
+hash_2 <- hash_gen(seed = 56889004)
+hash_1("7yya4071872dfdfdfdfaa")
 ```
 
 Y ahora hacemos una función para contar el número 0's consecutivos
@@ -978,6 +980,7 @@ Simulamos unos datos y calculamos la cubeta para cada dato:
 
 ```{r}
 n <- 100000
+hash_1 <- compose(intToBits, textreuse::hash_string)
 df <- data_frame(num_distintos = 1:n) %>%
       mutate(id = as.character(sample.int(52345678, n, replace = FALSE))) %>%
       mutate(hash = map(id, hash_1)) %>%
@@ -1066,5 +1069,6 @@ df_tbl %>%
 - Resuelve los dos ejercicios pendientes (uno en filtro de Bloom, otro en las sección de muestras uniformemente distribuidas
 
 - Repetir la estimación del hyperloglog del ejemplo de clase aumentando a 250-500 mil elementos distintos. Puedes utilizar la implementación de spark. ¿Qué errror relativo
-obtuviste? Nota: puedes usar la implementación en R que vimos en clase, pero ojo: las funciones hash que utilizamos son relativamente lentas.
+obtuviste? Nota: puedes también usar la implementación en R, pero es considerablemente
+más lenta que la versión de Spark
 
