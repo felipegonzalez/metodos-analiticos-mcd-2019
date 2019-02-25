@@ -18,7 +18,7 @@ Hay varios enfoques que podemos utilizar para atacar este problema:
 
 Ejemplo: Si mu gustó *Twilight* entonces el sistema recomienda otros dramas+vampiros ("por ejemplo entrevista con un vampiro", por contenido).
 
-- **Principalmente colaborativos**: utilizamos gustos o intereses de usuarios/artículos similares - en el sentido de que les han gustado los mismos artículos/les gustaron a las mismas personas.
+- **Principalmente colaborativos**: utilizamos gustos o intereses de usuarios/artículos similares --- en el sentido de que les han gustado los mismos artículos/les gustaron a las mismas personas.
 
 Ejemplo: Me gustó StarWars y Harry Potter, varios otros usuarios a los que también les gustaron estas dos películas también les gustó "Señor de los anillos", así que recomendamos "Señor de los Anillos". Entre estos métodos, veremos principalmente métodos basados en reducción de dimensionalidad o  **modelos de factores latentes**: encontrar factores latentes que describan usuarios y películas, y predecimos dependiendo de los niveles de factores latentes de personas y películas.
 
@@ -28,7 +28,7 @@ Ejemplo: Me gustó StarWars y Harry Potter, varios otros usuarios a los que tamb
 Los datos utilizados para este tipo de sistemas son de dos
 tipos:
 
-- Ratings  *explícitos* dados por los usuarios (por ejemplo, Netflix mucho tiempo fue así: 1-5 estrellas)
+- Ratings  *explícitos* dados por los usuarios (por ejemplo, Netflix mucho tiempo fue así: $1-5$ estrellas)
 
 - Ratings *implícitos* que se derivan de la actividad de los usuarios (por ejemplo, vio la película completa, dio click en la descripción de un producto, etc.). 
 
@@ -36,7 +36,7 @@ tipos:
 
 ### Ejemplo {-}
 
-Consideramos evaluaciones en escala de gusto: por ejemplo 1-5 estrellas, o 1-me disgustó mucho, 5- me gustó mucho, etc.
+Consideramos evaluaciones en escala de gusto: por ejemplo $1-5$ estrellas, o $1$-me disgustó mucho, $5$-me gustó mucho, etc.
 
 Podemos representar las evaluaciones como una matriz:
 
