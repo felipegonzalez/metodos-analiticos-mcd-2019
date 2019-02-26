@@ -135,24 +135,24 @@ cuando tenemos cierta información de usuarios y de películas.
 Los datos del concurso de Netflix originalmente vienen en archivos de texto, un archivo por película.
 
 
-The movie rating files contain over 100 million ratings from 480 thousand
-randomly-chosen, anonymous Netflix customers over 17 thousand movie titles.  The
-data were collected between October, 1998 and December, 2005 and reflect the
+The movie rating files contain over $100$ million ratings from $480$ thousand
+randomly-chosen, anonymous Netflix customers over $17$ thousand movie titles.  The
+data were collected between October, $1998$ and December, $2005$ and reflect the
 distribution of all ratings received during this period.  The ratings are on a
-scale from 1 to 5 (integral) stars. To protect customer privacy, each customer
+scale from $1$ to $5$ (integral) stars. To protect customer privacy, each customer
 id has been replaced with a randomly-assigned id.  The date of each rating and
 the title and year of release for each movie id are also provided.
 
-The file "training_set.tar" is a tar of a directory containing 17770 files, one
+The file "training_set.tar" is a tar of a directory containing $17770$ files, one
 per movie.  The first line of each file contains the movie id followed by a
 colon.  Each subsequent line in the file corresponds to a rating from a customer
 and its date in the following format:
 
 CustomerID,Rating,Date
 
-- MovieIDs range from 1 to 17770 sequentially.
-- CustomerIDs range from 1 to 2649429, with gaps. There are 480189 users.
-- Ratings are on a five star (integral) scale from 1 to 5.
+- MovieIDs range from $1$ to $17770$ sequentially.
+- CustomerIDs range from $1$ to $2649429$, with gaps. There are $480189$ users.
+- Ratings are on a five star (integral) scale from $1$ to $5$.
 - Dates have the format YYYY-MM-DD.
 
 ---
@@ -212,7 +212,7 @@ Y vemos que hay más variabilidad en los promedios cuando hay menos evaluaciones
 es de esperarse. ¿Puedes ver algún problema que tendremos que enfrentar con el modelo simple? 
 
 
-Si filtramos por número de calificaciones (al menos 500 por ejemplo), 
+Si filtramos por número de calificaciones (al menos $500$ por ejemplo), 
 estas son las películas mejor calificadas (la mayoría conocidas y populares):
 
 ```{r}
@@ -303,8 +303,8 @@ ggplot(muestra_res, aes(x=factor(usuario_id), y = media_calif,
   theme(axis.text.x=element_blank())
 ```
 
-Y notamos que hay unos usuarios que tienen promedios por encima de 4.5, mienstras que otros
-califican por debajo de 3 en promedio. Aunque esto puede deberse a las películas que han visto,
+Y notamos que hay unos usuarios que tienen promedios por encima de $4.5$, mienstras que otros
+califican por debajo de $3$ en promedio. Aunque esto puede deberse a las películas que han visto,
 generalmente una componente de esta variabilidad se debe a cómo usa la escala cada usuario.
 
 - En primer lugar, quizá uno podría pensar que un modelo base consiste de simplemente
@@ -313,10 +313,10 @@ de uso de la escala de calificación, que depende más de forma de uso de escala
 
 Hay personas que son:
 
-- Barcos: 5,5,5,4,4,5 
-- Estrictos: 2,3,3,1,1,2
-- No se compromete: 3,3,3,3,4
-- Discrimina: 5,4,5,1,2,4
+- Barcos: $5$,$5$,$5$,$4$,$4$,$5$ 
+- Estrictos: $2$,$3$,$3$,$1$,$1$,$2$
+- No se compromete: $3$,$3$,$3$,$3$,$4$
+- Discrimina: $5$,$4$,$5$,$1$,$2$,$4$
 
 El estilo de uso de las escalas varía por persona.
 Puede estar asociado a aspectos culturales (países
