@@ -18,7 +18,7 @@ Hay varios enfoques que podemos utilizar para atacar este problema:
 
 Ejemplo: Si mu gustó *Twilight* entonces el sistema recomienda otros dramas+vampiros ("por ejemplo entrevista con un vampiro", por contenido).
 
-- **Principalmente colaborativos**: utilizamos gustos o intereses de usuarios/artículos similares - en el sentido de que les han gustado los mismos artículos/les gustaron a las mismas personas.
+- **Principalmente colaborativos**: utilizamos gustos o intereses de usuarios/artículos similares --- en el sentido de que les han gustado los mismos artículos/les gustaron a las mismas personas.
 
 Ejemplo: Me gustó StarWars y Harry Potter, varios otros usuarios a los que también les gustaron estas dos películas también les gustó "Señor de los anillos", así que recomendamos "Señor de los Anillos". Entre estos métodos, veremos principalmente métodos basados en reducción de dimensionalidad o  **modelos de factores latentes**: encontrar factores latentes que describan usuarios y películas, y predecimos dependiendo de los niveles de factores latentes de personas y películas.
 
@@ -28,7 +28,7 @@ Ejemplo: Me gustó StarWars y Harry Potter, varios otros usuarios a los que tamb
 Los datos utilizados para este tipo de sistemas son de dos
 tipos:
 
-- Ratings  *explícitos* dados por los usuarios (por ejemplo, Netflix mucho tiempo fue así: 1-5 estrellas)
+- Ratings  *explícitos* dados por los usuarios (por ejemplo, Netflix mucho tiempo fue así: $1-5$ estrellas)
 
 - Ratings *implícitos* que se derivan de la actividad de los usuarios (por ejemplo, vio la película completa, dio click en la descripción de un producto, etc.). 
 
@@ -36,7 +36,7 @@ tipos:
 
 ### Ejemplo {-}
 
-Consideramos evaluaciones en escala de gusto: por ejemplo 1-5 estrellas, o 1-me disgustó mucho, 5- me gustó mucho, etc.
+Consideramos evaluaciones en escala de gusto: por ejemplo $1-5$ estrellas, o $1$-me disgustó mucho, $5$-me gustó mucho, etc.
 
 Podemos representar las evaluaciones como una matriz:
 
@@ -135,24 +135,24 @@ cuando tenemos cierta información de usuarios y de películas.
 Los datos del concurso de Netflix originalmente vienen en archivos de texto, un archivo por película.
 
 
-The movie rating files contain over 100 million ratings from 480 thousand
-randomly-chosen, anonymous Netflix customers over 17 thousand movie titles.  The
-data were collected between October, 1998 and December, 2005 and reflect the
+The movie rating files contain over $100$ million ratings from $480$ thousand
+randomly-chosen, anonymous Netflix customers over $17$ thousand movie titles.  The
+data were collected between October, $1998$ and December, $2005$ and reflect the
 distribution of all ratings received during this period.  The ratings are on a
-scale from 1 to 5 (integral) stars. To protect customer privacy, each customer
+scale from $1$ to $5$ (integral) stars. To protect customer privacy, each customer
 id has been replaced with a randomly-assigned id.  The date of each rating and
 the title and year of release for each movie id are also provided.
 
-The file "training_set.tar" is a tar of a directory containing 17770 files, one
+The file "training_set.tar" is a tar of a directory containing $17770$ files, one
 per movie.  The first line of each file contains the movie id followed by a
 colon.  Each subsequent line in the file corresponds to a rating from a customer
 and its date in the following format:
 
 CustomerID,Rating,Date
 
-- MovieIDs range from 1 to 17770 sequentially.
-- CustomerIDs range from 1 to 2649429, with gaps. There are 480189 users.
-- Ratings are on a five star (integral) scale from 1 to 5.
+- MovieIDs range from $1$ to $17770$ sequentially.
+- CustomerIDs range from $1$ to $2649429$, with gaps. There are $480189$ users.
+- Ratings are on a five star (integral) scale from $1$ to $5$.
 - Dates have the format YYYY-MM-DD.
 
 ---
@@ -212,7 +212,7 @@ Y vemos que hay más variabilidad en los promedios cuando hay menos evaluaciones
 es de esperarse. ¿Puedes ver algún problema que tendremos que enfrentar con el modelo simple? 
 
 
-Si filtramos por número de calificaciones (al menos 500 por ejemplo), 
+Si filtramos por número de calificaciones (al menos $500$ por ejemplo), 
 estas son las películas mejor calificadas (la mayoría conocidas y populares):
 
 ```{r}
@@ -299,12 +299,12 @@ muestra_res <- muestra_graf %>% group_by(usuario_id) %>%
 muestra_res$usuario_id <- reorder(factor(muestra_res$usuario_id), muestra_res$media_calif)
 ggplot(muestra_res, aes(x=factor(usuario_id), y = media_calif, 
         ymin = media_calif - sd_calif, ymax = media_calif + sd_calif)) + 
-  geom_linerange() + geom_point() + xlab('Usuario') +
+  geom_linerange() + geom_point() + xlab('Usuario ID') +
   theme(axis.text.x=element_blank())
 ```
 
-Y notamos que hay unos usuarios que tienen promedios por encima de 4.5, mienstras que otros
-califican por debajo de 3 en promedio. Aunque esto puede deberse a las películas que han visto,
+Y notamos que hay unos usuarios que tienen promedios por encima de $4.5$, mienstras que otros
+califican por debajo de $3$ en promedio. Aunque esto puede deberse a las películas que han visto,
 generalmente una componente de esta variabilidad se debe a cómo usa la escala cada usuario.
 
 - En primer lugar, quizá uno podría pensar que un modelo base consiste de simplemente
@@ -313,10 +313,10 @@ de uso de la escala de calificación, que depende más de forma de uso de escala
 
 Hay personas que son:
 
-- Barcos: 5,5,5,4,4,5 
-- Estrictos: 2,3,3,1,1,2
-- No se compromete: 3,3,3,3,4
-- Discrimina: 5,4,5,1,2,4
+- Barcos: $5$,$5$,$5$,$4$,$4$,$5$ 
+- Estrictos: $2$,$3$,$3$,$1$,$1$,$2$
+- No se compromete: $3$,$3$,$3$,$3$,$4$
+- Discrimina: $5$,$4$,$5$,$1$,$2$,$4$
 
 El estilo de uso de las escalas varía por persona.
 Puede estar asociado a aspectos culturales (países
@@ -374,7 +374,8 @@ ser mala idea porque el sesgo hacia arriba puede ser alto, especialmente si la g
 es un sus niveles generales de calificaciones (hay muy barcos y muy estrictos).
 
 ### Ejemplo {#ejemplo}
-Los niveles generales de $10$ personas:
+
+Los niveles generales de $50$ personas:
 
 ```{r}
 set.seed(128)
@@ -594,7 +595,7 @@ a $j$ que haya vista $i$, y ajustar la predicción según la calificación de es
 
 
 Tomamos entonces nuestra predicción
-base, que le llamamaos $x_{ij}^0$ y hacemos una nueva predicción:
+base, que le llamamos $x_{ij}^0$ y hacemos una nueva predicción:
 
 $$\hat{x}_{ij} = x_{ij}^0 + \frac{1}{k}\sum_{t \in N(i,j)} (x_{it} - x_{it}^0 )$$
 
