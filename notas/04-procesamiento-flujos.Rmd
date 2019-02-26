@@ -65,7 +65,7 @@ median(total_montos)
 ```
 
 
-Si queremos seleccionar un 1\% de las transacciones para hacer más rápido
+Si queremos seleccionar un $1\%$ de las transacciones para hacer más rápido
 nuestro cálculo, podemos seleccionar al azar para cada elemento si lo
 incluímos en la muestra o no, por ejemplo:
 
@@ -135,8 +135,8 @@ sprintf("Mediana de máximo monto: %.1f", mediana_max)
 ```
 
 ¿Cómo funciona si quisiéramos usar una muestra? Usamos una función hash y 
-repartimos en 10 cubetas (deberíamos
-obtener alrededor del 10\% de los clientes). Seleccionamos una sola cubeta
+repartimos en $10$ cubetas (deberíamos
+obtener alrededor del $10\%$ de los clientes). Seleccionamos una sola cubeta
 y usamos para resumir:
 
 ```{r}
@@ -258,7 +258,7 @@ Usaremos un vector de tamaño $n=11$ (longitud de vector de bits), y suponemos
 que los valores posibles ($\Omega$) son los enteros de uno a mil. Queremos
 detectar cuando observamos algún elemento de $S=\{15,523,922\}$. Para este
 ejemplo usamos $k=2$ funciones hash. Estas funciones deben mapear
-los enteros del uno al mil a las cubetas 1 a 11 (el número de entradas del
+los enteros del uno al mil a las cubetas $1$ a $11$ (el número de entradas del
  vector de bits). 
 
 ```{r}
@@ -461,7 +461,7 @@ m <- length(diccionario)
 m
 ```
 
-Queremos insertar entonces unos 250 mil elementos, aunque puede ser posible
+Queremos insertar entonces unos $250$ mil elementos, aunque puede ser posible
 que quizá queramos insertar otras palabras más adelante.
 
 ```{r}
@@ -483,8 +483,8 @@ ggplot(df, aes(x = k, y = tasa_falsos_p,
                scale_y_log10(breaks= c(0.0001, 0.001, 0.01, 0.1))
 ```
 
-Podemos intentar usar un vector de 8 millones de bits con unos 6 hashes. Nuestra
-estimación de falsos positivos con 6 hashes es de
+Podemos intentar usar un vector de $8$ millones de bits con unos $6$ hashes. Nuestra
+estimación de falsos positivos con $6$ hashes es de
 
 ```{r}
 n <- 8e6
@@ -658,7 +658,7 @@ de español en México). Agrégala al filtro y verifica que es detectada como
 positiva. Busca una posible manera incorrecta de escribirla y prueba la
 función de arriba de sugerencias.
 
-- Prueba usando un vector de bits mucho más chico (por ejemplo de 500 mil bits). 
+- Prueba usando un vector de bits mucho más chico (por ejemplo de $500$ mil bits). 
 ¿Qué tasa de falsos positivos obtienes?
 
 ## Muestra distribuida uniformemente en el flujo.
@@ -694,7 +694,7 @@ ggplot(datos %>% filter(n < n_0), aes(x = n, y = obs, colour = factor((n_0 - n) 
   geom_line()
 ```
 
-Si utilizamos una ventana reciente de tamaño 50, nuestras estimaciones del estado del sistema 
+Si utilizamos una ventana reciente de tamaño $50$, nuestras estimaciones del estado del sistema 
 están sesgadas a los últimos valores.
 
 Sin embargo, si aplicamos el esquema mostrado arriba:
@@ -911,7 +911,7 @@ de elementos distintos en el flujo.
 
 Como vimos en los ejemplos anteriores, la estimación de Flajolet-Martin
 tiene dos debilidades: varianza alta, y el hecho de que el único resultado
-que puede dar es una potencia de 2.
+que puede dar es una potencia de $2$.
 
 Podemos usar varias funciones hash y combinarlas de distintas maneras
 para obtener una mejor estimación con menos varianza. 
@@ -952,7 +952,7 @@ armónico $a$ de $m$ cantidades $(n/m)$ de esta cantidad entonces debería estar
 del orden en $n/m$, así que la estimación final de la cardinalidad del flujo
 completo es $ma$ (el número de cubetas multiplicado por el promedio armónico). 
 - Existen varias correcciones adicionales para mejorar su error en distintas circunstancias (dependiendo del número de elemntos únicos que estamos contando, por ejemplo). Una típica
-es multiplicar por 0.72 el resultado de los cálculos anteriores para corregir sesgo
+es multiplicar por $0.72$ el resultado de los cálculos anteriores para corregir sesgo
 multiplicativo (ver referencia de Flajolet).
 
 Veamos una implementación **simplificada** (nota: considerar *spark* para hacer
@@ -995,7 +995,7 @@ df <- df %>% mutate(tail = map_int(hash, tail_length_lead))
 df      
 ```
 
-Ahora vemos cómo calcular nuestra estimación. cuando hay 50 mil distintos, calculamos
+Ahora vemos cómo calcular nuestra estimación. cuando hay $50$ mil distintos, calculamos
 máximo por cubeta
 
 ```{r}
@@ -1013,7 +1013,7 @@ armonica <- function(x) 1/mean(1/x)
 ```
 
 Y esta es nuestra estimación de únicos en el momento que el verdadero valor
-es igual a 50000.
+es igual a $50000$.
 
 Podemos ver cómo se desempeña la estimación conforme nuevos únicos van llegando (el 
 siguiente cálculo son necesarias algunas manipulaciones para poder calcular
@@ -1044,7 +1044,7 @@ quantile(1 - res_2$estimador_hll/res_2$num_distintos, probs=c(0.1, 0.5, .9))
 
 **Observaciones**
 - Ver también [este paper](https://stefanheule.com/papers/edbt13-hyperloglog.pdf) para mejoras del hyperloglog (por ejemplo, si es posible es preferible usar
-hashes de 64 bits en lugar de 32).
+hashes de $64$ bits en lugar de $32$).
 
 - El error relativo teórico del algoritmo (con algunas mejoras que puedes ver en los papers citados) es de $1.04/\sqrt{m}$, donde $m$ es el número de cubetas, así que más cubetas mejoran el desempeño.
 
