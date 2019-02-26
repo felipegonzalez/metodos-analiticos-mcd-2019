@@ -299,7 +299,7 @@ muestra_res <- muestra_graf %>% group_by(usuario_id) %>%
 muestra_res$usuario_id <- reorder(factor(muestra_res$usuario_id), muestra_res$media_calif)
 ggplot(muestra_res, aes(x=factor(usuario_id), y = media_calif, 
         ymin = media_calif - sd_calif, ymax = media_calif + sd_calif)) + 
-  geom_linerange() + geom_point() + xlab('Usuario') +
+  geom_linerange() + geom_point() + xlab('Usuario ID') +
   theme(axis.text.x=element_blank())
 ```
 
