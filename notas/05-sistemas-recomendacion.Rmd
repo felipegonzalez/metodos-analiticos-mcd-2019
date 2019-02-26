@@ -99,7 +99,7 @@ y este promedio es sobre los $N_j$ usuarios que vieron (y calificaron) la pelíc
 ### Evaluación de predicciones
 
 Usamos muestras de entrenamiento y validación. Como en el concurso de Netflix,
-utilizaremos el error cuadrático medio:
+utilizaremos la raíz del error cuadrático medio:
 
 $$RECM =\left ( \frac{1}{T} \sum_{(i,j) \, observada} (x_{ij}-\hat{x}_{ij})^2 \right)^{\frac{1}{2}}$$
 
