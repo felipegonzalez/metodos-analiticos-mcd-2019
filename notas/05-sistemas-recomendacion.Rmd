@@ -374,6 +374,7 @@ ser mala idea porque el sesgo hacia arriba puede ser alto, especialmente si la g
 es un sus niveles generales de calificaciones (hay muy barcos y muy estrictos).
 
 ### Ejemplo {#ejemplo}
+
 Los niveles generales de $50$ personas:
 
 ```{r}
@@ -409,7 +410,7 @@ cor(mediciones[,2:3])
 
 
 
-Así que aún cuando el gusto por 1 y 2  están correlacionadas negativamente, las 
+Así que aún cuando el gusto por $1$ y $2$  están correlacionadas negativamente, las 
 **mediciones** de gusto no están correlacionadas.
 ```{r, fig.width=5, fig.asp = 0.7}
 ggplot(mediciones, aes(x=medicion_1, y=medicion_2)) +
@@ -420,7 +421,7 @@ ggplot(mediciones, aes(x=medicion_1, y=medicion_2)) +
 el trabajo usual, generalmente intentamos controlar parte de la heterogeneidad
 **centrando** las calificaciones por usuario. Es decir, a cada calificación
 de una persona le restamos la media de sus calificaciones, que es una estimación
-del nivel general $N$. Esta idea funciona si **k no es muy chico**.
+del nivel general $N$. Esta idea funciona si **$k$ no es muy chico**.
 
 
 Si el número de calificaciones por persona ($k$) es chico,
@@ -523,9 +524,9 @@ dat_valida %>% ungroup %>% summarise(error = recm(calif, pred))
 **Observación**: ¿Qué tan bueno es este resultado? De 
 [wikipedia](https://en.wikipedia.org/wiki/Netflix_Prize):
 
-> Prizes were based on improvement over Netflix's own algorithm, called Cinematch, or the previous year's score if a team has made improvement beyond a certain threshold. A trivial algorithm that predicts for each movie in the quiz set its average grade from the training data produces an RMSE of 1.0540. Cinematch uses "straightforward statistical linear models with a lot of data conditioning".
+> Prizes were based on improvement over Netflix's own algorithm, called Cinematch, or the previous year's score if a team has made improvement beyond a certain threshold. A trivial algorithm that predicts for each movie in the quiz set its average grade from the training data produces an RMSE of $1.0540$. Cinematch uses "straightforward statistical linear models with a lot of data conditioning".
 >
->Using only the training data, Cinematch scores an RMSE of 0.9514 on the quiz data, roughly a 10% improvement over the trivial algorithm. Cinematch has a similar performance on the test set, 0.9525. In order to win the grand prize of $1,000,000, a participating team had to improve this by another 10%, to achieve 0.8572 on the test set. Such an improvement on the quiz set corresponds to an RMSE of 0.8563.
+>Using only the training data, Cinematch scores an RMSE of $0.9514$ on the quiz data, roughly a 10% improvement over the trivial algorithm. Cinematch has a similar performance on the test set, $0.9525$. In order to win the grand prize of $1,000,000$, a participating team had to improve this by another $10%$, to achieve $0.8572$ on the test set. Such an improvement on the quiz set corresponds to an RMSE of $0.8563$.
 
 Aunque nótese que estrictamente hablando no podemos comparar nuestros resultados con estos números,
 en los que se usa una muestra de prueba separada, de películas vistas despúes del periodo de entrenamiento.
@@ -647,7 +648,7 @@ knitr::kable(mat.c, digits = 2)
 ```
 
 Y calculamos similitud coseno entre películas,  **suponiendo que las películas
-no evaluadas tienen calificación 0**:
+no evaluadas tienen calificación $0$**:
 
 ```{r}
 sim_cos <- function(x,y){
@@ -665,9 +666,9 @@ sim_cos(mat.c[,1], mat.c[,6])
 
 
 **Observación**:
-- Hacer este supuesto de valores 0 cuando no tenemos evaluación no es lo mejor, pero 
+- Hacer este supuesto de valores $0$ cuando no tenemos evaluación no es lo mejor, pero 
 como centramos por usuario tiene más sentido hacerlo. Si utilizaramos las calificaciones
-no centradas, entonces estaríamos suponiendo que las no evaluadas están calificadas muy mal (0, por abajo de 1,2,3,4,5).
+no centradas, entonces estaríamos suponiendo que las no evaluadas están calificadas muy mal ($0$, por abajo de $1$,$2$,$3$,$4$,$5$).
 - Si calculamos similitud entre *usuarios* de esta forma, las distancia coseno es simplemente el coeficiente de correlación. Nótese que estamos
 calculando similitud entre *items*, centrando por usuario, y esto no
 es lo mismo que correlación entre columnas.
@@ -721,7 +722,7 @@ sim_cos(comunes$calif_c, comunes$calif_c_2)
 sim_cos(comunes_2$calif_c, comunes_2$calif_c_2)
 ```
 
-Así que las dos Gremlins son algo similares, pero Gremlins 2 y Harry Met Sally no son similares.
+Así que las dos Gremlins son algo similares, pero Gremlins $2$ y Harry Met Sally no son similares.
 
 ---
 
