@@ -1590,7 +1590,7 @@ Nótese la diferencia con el caso explícito. En este caso, los valores
 de $c_{ij}$ (confianza) actúan como un pesos en el ajuste de
 los factores, indicando que valores altos de $r_{ij}$ son más informativos y
 deben contribuir más en el ajuste, sin descalificar que un
-artìculo con $r_{ij$ bajo puede ser preferido. Adicionalmente, los valores
+artìculo con $r_{ij}$ bajo puede ser preferido. Adicionalmente, los valores
 para los cuales $p_{ij}=0$ son los que reciben el peso mínimo ($c_{ij}=1$).
 
 Igual que en los ejemplos anteriores, usualmente se agregan términos
