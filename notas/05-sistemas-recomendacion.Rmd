@@ -484,7 +484,7 @@ $$\hat{d_j} =\frac{1}{N_j}\sum_{s} x_{sj}- \hat{\mu}$$
 Una vez que observamos una calificación $x_{ij}$, el residual del modelo de referencia es
 $$r_{ij} = x_{ij} - \hat{x_{ij}}$$
 
-### Ejercicio: modelo de referencia para netflix {-}
+### Ejercicio: modelo de referencia para Netflix {-}
 
 Calculamos media de películas, usuarios y total:
 
@@ -702,7 +702,7 @@ comunes <- inner_join(dat_1[, c('usuario_id','calif_c')], dat_2[, c('usuario_id'
 comunes_2 <- inner_join(dat_1[, c('usuario_id','calif_c')], dat_3[, c('usuario_id','calif_c')] %>% rename(calif_c_2=calif_c))
 ```
 
-Y ahora graficamos. ¿Por qué se ven bandas en estas gráficas??
+Y ahora graficamos. ¿Por qué se ven bandas en estas gráficas?
 
 ```{r, fig.width = 5, fig.asp = 0.7, message=FALSE, warning = FALSE}
 ggplot(comunes, aes(x=calif_c, y=calif_c_2)) + 
@@ -1342,7 +1342,7 @@ un factor constante).
 - Este es un tipo de regularización distinto al que usamos en el ejemplo
 de mínimos cuadrados alternados.
 
-### Ejemplo (netflix)
+### Ejemplo (Netflix)
 Usaremos una  implementación en C++ para tener mejor desempeño 
 (una introducción a extensiones de C++ para R está en 
 [@advanced-r]).
