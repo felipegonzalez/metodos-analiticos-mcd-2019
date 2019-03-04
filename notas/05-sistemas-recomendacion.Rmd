@@ -327,7 +327,7 @@ Lo primero que vamos a hacer para controlar esta fuente de variación es ajustar
 dependiendo del promedio de calificaciones de cada usuario.
 
 
-### (Opcional) Efectos en análisis de heterogeneidad en uso de escala.
+### (Opcional) Efectos en análisis de heterogeneidad en uso de escala
 
  Muchas veces se considera que tratar como numéricos a calificaciones en escala no es muy apropiado, y que el análisis no tiene por qué funcionar pues en realidad las calificaciones están en una escala ordinal. Sin embargo,
 
@@ -824,7 +824,7 @@ de dimensión).
 
 
 
-### Ejemplo: una dimensión latente.{#ejemplo}
+### Ejemplo: una dimensión latente{#ejemplo}
 Por ejemplo: consideramos una dimensión de películas serias contra películas divertidas.
 3 películas podrían describirse con
 
@@ -982,7 +982,7 @@ $$X^0 + \tilde{X}$$
 Veremos también más adelante cómo regularizar estos sesgos como
 parte de la construcción del modelo.
 
-## Factorización de matrices.
+## Factorización de matrices
 
 Como vimos arriba, reexpresamos nuestro problema como un problema
 de factorización de matrices  (encontrar $U$ y $V$). Hay varias alternativas populares para atacarlo:
@@ -996,7 +996,7 @@ las notas del curso de aprendizaje de máquina <https://felipegonzalez.github.io
 es del todo apropiado: nuestras matrices tienen muchos datos faltantes, y SVD naturalmente no está diseñado para lidiar con este problema. Se pueden hacer ciertas imputaciones (por ejemplo, insertar 0's una vez que centramos por usuario), pero los siguientes dos métodos están mejor adaptados para
 nuestro problema.
 
-## Mínimos cuadrados alternados.
+## Mínimos cuadrados alternados
 
 Supongamos entonces que queremos encontrar matrices $U$ y $V$, donde $U$ es una matrix de $nxk$ (n= número de usuarios), y $V$ es una matriz
 de $pxk$, donde $p$ es el número de películas que nos de una
