@@ -826,18 +826,18 @@ de dimensión).
 
 ### Ejemplo: una dimensión latente.{#ejemplo}
 Por ejemplo: consideramos una dimensión de películas serias contra películas divertidas.
-3 películas podrían describirse con
+$3$ películas podrían describirse con
 
 $$v=(-2,0,1)$$,
 
-lo que interpretamos como la película 1 es divertida (negativa en seriedad-diversión), la película 2 está en promedio, y la película 3 es más seria que las dos anteriores.
+lo que interpretamos como la película $1$ es divertida (negativa en seriedad-diversión), la película $2$ está en promedio, y la película $3$ es más seria que las dos anteriores.
  
 Por otro lado, tenemos descriptores de 5 usuarios:
 
 $$u=(2,3,-3,0,1)$$
 que dice que a los primeros dos usuarios les gustan las películas serias, al tercero le gustan las divertidas, y los dos últimos no tienen preferencia clara a lo largo de esta dimensión.
 
-Qusiéramos predecir el gusto usando estos dos vectores. Nuestras predicciones (considerando que u y v son matrices de una columna) serían simplemente
+Qusiéramos predecir el gusto usando estos dos vectores. Nuestras predicciones (considerando que $u$ y $v$ son matrices de una columna) serían simplemente
 
 $$\tilde{X} = u v^t$$
 
@@ -848,7 +848,7 @@ gustos <- u%*%t(v)
 gustos
 ```
 
-Así que al usuario 1 le recomndamos la película 3, pero al usuario 3 le recomendamos la película 1.
+Así que al usuario $1$ le recomndamos la película $3$, pero al usuario $3$ le recomendamos la película $1$.
 
 ---
 
@@ -872,16 +872,16 @@ v_2 <- c(-3,2,2)
 u_2 <- c(-3,-3,0,-2,4)
 ```
 
-Que quiere decir que las película 2,3 tienen volencia, pero la película 1 no. Por otra parte, a los usuarios 1,2 y 5 no les gustan las películas con violencia, mientras que al usuario 5 si les gustan.
+Que quiere decir que las películas $2, 3$ tienen volencia, pero la película $1$ no. Por otra parte, a los usuarios $1,2$ y $5$ no les gustan las películas con violencia, mientras que al usuario $5$ si les gustan.
 
-La idea ahora es que el gusto de una persona por una película se escribe como combinación de las dos dimensiones. Por ejemplo, para la persona 1 tenemos, y la película 1, empezamos haciendo
+La idea ahora es que el gusto de una persona por una película se escribe como combinación de las dos dimensiones. Por ejemplo, para la persona $1$ tenemos, y la película $1$, empezamos haciendo
 
 ```{r}
 u_1[1]*v_1[1]
 u_2[1]*v_2[1]
 ```
 
-lo que quiere decir que el hecho de que la película 1 no sea seria le resta 4 en gusto (pues la película 1 está del lado "divertido"), pero le suma 9 en gusto, pues es una película sin violencia y esta persona está del lado "sin violencia".
+lo que quiere decir que el hecho de que la película $1$ no sea seria le resta $4$ en gusto (pues la película $1$ está del lado "divertido"), pero le suma $9$ en gusto, pues es una película sin violencia y esta persona está del lado "sin violencia".
 
 Sumamos para encontrar el gusto total
 
@@ -910,8 +910,8 @@ Con $k$ dimensiones latentes, el modelo que proponemos es:
 
 $$\tilde{X} = UV^t$$
 
-donde $U$ es una matrix de $nxk$ (n= número de usuarios), y $V$ es una matriz
-de $pxk$, donde $p$ es el número de películas.
+donde $U$ es una matrix de $n\times k$ ($n=$ número de usuarios), y $V$ es una matriz
+de $p \times k$, donde $p$ es el número de películas.
 
 Buscamos que, si $X$ son las verdaderas calificaciones, entonces
 $$X\approx \tilde{X}.$$
@@ -998,8 +998,8 @@ nuestro problema.
 
 ## Mínimos cuadrados alternados.
 
-Supongamos entonces que queremos encontrar matrices $U$ y $V$, donde $U$ es una matrix de $nxk$ (n= número de usuarios), y $V$ es una matriz
-de $pxk$, donde $p$ es el número de películas que nos de una
+Supongamos entonces que queremos encontrar matrices $U$ y $V$, donde $U$ es una matrix de $n \times k$ ($n=$ número de usuarios), y $V$ es una matriz
+de $p \times k$, donde $p$ es el número de películas que nos de una
 aproximación de la matrix $X$ de calificaciones
 $$
 X \approx UV^t
@@ -1075,7 +1075,7 @@ valida_tbl <- copy_to(sc, dat_valida %>% select(-fecha))
 entrena_tbl <- dat_tbl %>% anti_join(valida_tbl)
 ```
 
-Vamos a hacer primero una descomposición en 10 factores,
+Vamos a hacer primero una descomposición en $10$ factores,
 con regularización relativamente alta:
 
 ```{r als-spark}
@@ -1236,7 +1236,7 @@ y
 $$\frac{\partial L_{i,j}}{\partial v_{j,t}} = -2e_{i,j} u_{i,t}
 $$
 
-El resto de las derivadas son iguales a 0 (para otros $u_a^{(m)}$, 
+El resto de las derivadas son iguales a $0$ (para otros $u_a^{(m)}$, 
 $v_b^{(m)}$). Esto nos da la dirección del gradiente en cada paso del descenso estocástico. 
 
 ```{block2, type = 'comentario'}
@@ -1272,7 +1272,7 @@ $$
 $$\frac{\partial L_{i,j}}{\partial b_j} = -2e_{i,j} 
 $$
 
-y el resto de las derivadas (para otras $a_s$ y $b_t$) son iguales a 0.
+y el resto de las derivadas (para otras $a_s$ y $b_t$) son iguales a $0$.
 
 
 ```{block2, type='resumen'}
