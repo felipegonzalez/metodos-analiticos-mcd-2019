@@ -1,0 +1,201 @@
+---
+title: "Recomendación implícita"
+output: html_notebook
+---
+
+Datos de preferencia implícita de Lastfm, <http://www.dtic.upf.edu/~ocelma/MusicRecommendationDataset/lastfm-360K.html>
+
+
+## Limpieza de datos
+
+Arrancamos spark:
+
+```{r, message=FALSE, warning=FALSE}
+library(tidyverse)
+library(sparklyr)
+config <- spark_config()
+config$`sparklyr.shell.driver-memory` <- "4G"
+config$`sparklyr.shell.executor-memory` <- "2G"
+sc <- spark_connect(master = "local", config = config)
+sc <- spark_connect(master = "local")
+spark_set_checkpoint_dir(sc, './checkpoint')
+```
+
+Leemos datos
+
+```{r}
+path <- '../../datos/lastfm-dataset-360K/usersha1-artmbid-artname-plays.tsv'
+lastfm_tbl <- spark_read_csv(sc, 
+    name = "last_fm", path = path, header = FALSE, infer_schema = FALSE,
+    columns = c("user_id" = "character", "artist_id" = "character", "name" = "character", 
+                "plays" = "integer"),
+    delim = "\t", quote="\"",  overwrite = TRUE)
+lastfm_tbl
+```
+
+
+
+Limpiamos algunos na's y vemos la distribución de número de *plays*
+
+```{r}
+lastfm <- lastfm_tbl %>% 
+  filter(!is.na(plays)) %>%
+  filter(!is.na(artist_id)) 
+resumen <- lastfm %>% summarise(p_1 = percentile_approx(plays, 0.01),
+              p_50 = percentile_approx(plays, 0.50),
+              p_99 = percentile_approx(plays, 0.99),
+              max = max(plays, na.rm = T), n = n()) %>% collect
+resumen
+```
+
+En la cola superior hay valores muy grandes (casi medio millón de veces para
+un usuario y una canción). Podemos filtrar estos valores atípicos. Probamos
+por ejemplo con 5000 veces para una canción y un usuario:
+
+```{r}
+lastfm %>% summarise(mayor_5009 = sum(as.integer(plays > 5000), na.rm = TRUE)) %>% collect
+lastfm <- lastfm %>% filter(plays <= 5000)
+```
+
+**Nota**: en estos casos, donde tenemos una cola fuertemente larga a la derecha,
+podemos usar también $c_{ij} = 1 + \alpha\log(1+r_{ij}/\epsilon)$, donde
+$\epsilon>0$ es chica (en el paper, por ejemplo, usan $\epsilon=10^{-8}$).
+
+Numeramos los usuarios y los artistas, filtramos artistas desconocidos:
+
+
+```{r}
+lastfm <- lastfm %>% ft_string_indexer("user_id", "user_num") %>% 
+    ft_string_indexer("artist_id", "artist_num")
+#Filtramos artista desconocido (buscar el id)
+desconocidos <- lastfm %>% 
+  filter(artist_id=='125ec42a-7229-4250-afc5-e057484327fe') %>% collect
+table(desconocidos$name)
+lastfm <- lastfm %>% 
+  filter(artist_id != '125ec42a-7229-4250-afc5-e057484327fe')
+```
+
+Y podemos ver los artistas más populares, escogiendo un numbre (puede haber
+variaciones en el nombre que se identifican con el mismo id) para
+cada id de artistas:
+
+```{r}
+artistas <- lastfm %>% group_by(artist_num, artist_id) %>%
+  summarise(total_plays = sum(plays, na.rm = TRUE), name = first_value(name)) %>%
+  arrange(desc(total_plays))
+artistas_df <- artistas %>% collect
+artistas_df
+```
+
+
+```{r}
+lastfm <- lastfm %>% ungroup %>% select(-name) %>% 
+  left_join(artistas %>% select(artist_num, name)) %>%
+  group_by(user_id, artist_id, artist_num, user_num, name) %>%
+  summarise(plays = sum(plays, na.rm = TRUE))
+```
+
+
+## ALS para calificaciones implícitas
+
+
+
+```{r als-spark}
+modelo_imp <- ml_als(lastfm, 
+    rating_col = "plays", user_col = "user_num", item_col = "artist_num", 
+    rank = 10, reg_param = 0.01, alpha = 30,
+    implicit_prefs = TRUE, checkpoint_interval = 5, max_iter = 10)
+# Nota: checkpoint evita que la gráfica de cálculo
+# sea demasiado grande. Cada 5 iteraciones hace una
+# nueva gráfica con los resultados de la última iteración.
+```
+
+
+Colectamos los factores de los artistas:
+
+```{r}
+V_df <- collect(modelo_imp$item_factors)
+dim(V_df)
+```
+
+
+```{r}
+head(V_df)
+```
+
+Y ahora veamos cuáles artistas son similares según nuestros factores (haz
+algunas pruebas):
+
+```{r}
+artistas_df <- artistas %>% collect 
+# por ejemplo
+# 1 beatles
+# 63 Britney Spears
+# 3 red hot chili peppers
+# 5  metallica
+repr_artista <- V_df %>% filter(id == 5) 
+repr_artista <- as.numeric(repr_artista[-c(1,2)])
+```
+
+```{r}
+#sim_beatles <- apply((as.matrix(V_df[, -c(1,2)]) - beatles)^2,1,mean)
+# calculamos similitud coseno - primero normalizamos los vectores de cada
+# artista
+V <- as.matrix(V_df[, -c(1,2)])
+norma <- function(x) sqrt(sum(x^2)) 
+escala <- apply(V, 1, norma)
+V_norm <- t(scale(t(V), center = FALSE, scale = escala)) 
+# producto punto por el artista que escogimos:
+sim_artista <- V_norm %*% (repr_artista / norma(repr_artista))
+artista_df <- data_frame(artist_num = V_df$id,
+                         sim_artista = as.numeric(sim_artista)) %>% 
+  left_join(artistas_df) %>% arrange(desc(sim_artista))
+head(artista_df %>% filter(total_plays > 100), 20) %>%
+  select(name, sim_artista, total_plays)
+tail(artista_df %>% filter(total_plays > 100), 20) %>%
+  select(name, sim_artista, total_plays)
+```
+
+
+## Evaluación
+
+Para entender la evlauación, primero vemos cómo se ven los ranks encontrados para un usuario particular:
+
+```{r}
+usuarios_factores <- modelo_imp$item_factors %>% collect()
+```
+
+```{r}
+usuario_num <- 1125
+factores_1 <- usuarios_factores %>% filter(id == usuario_num) %>%
+    pull(features) %>% unlist
+preds <- tibble(p_estimada =  as.numeric(V %*% factores_1), 
+                artist_num = V_df$id ) %>% arrange(desc(p_estimada)) %>% 
+    mutate(rank_p = rank(desc(p_estimada))/length(p_estimada)) %>% left_join(artistas_df)
+preds
+```
+
+Ahora vemos dónde se colocan los artistas que el usuario escuchó
+
+```{r}
+historia <- lastfm %>% filter(user_num == usuario_num) %>% collect()
+preds_1 <- preds %>% left_join(historia)
+preds_1
+preds_1 %>% summarise(precision = sum((!is.na(plays))*rank_p) / sum(!is.na(plays)))
+
+```
+
+Nótese que si los artistas escuchados se distribuyeran al azar en la tabla, obtendríamos:
+
+```{r}
+preds_azar <- preds_1 %>% mutate(rank_p = sample(rank_p, length(rank_p)))
+preds_azar %>% summarise(precision = sum((!is.na(plays))*rank_p) / sum(!is.na(plays)))
+```
+
+
+
+Los artistas preferidos de este usuario son:
+
+```{r}
+head(historia %>% arrange(desc(plays)) %>% ungroup %>% select(name, plays), 50)
+```
