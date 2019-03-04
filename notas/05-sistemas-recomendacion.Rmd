@@ -1083,9 +1083,9 @@ modelo <- ml_als(entrena_tbl,
               rating_col = 'calif',
               user_col = 'usuario_id',
               item_col = 'peli_id', 
-              rank = 10, reg_param = 0.05,
+              rank = 15, reg_param = 0.05,
               checkpoint_interval = 5,
-              max_iter = 30)
+              max_iter = 50)
 # Nota: checkpoint evita que la gráfica de cálculo
 # sea demasiado grande. Cada 5 iteraciones hace una
 # nueva gráfica con los resultados de la última iteración.
@@ -1136,7 +1136,7 @@ latentes_pelis <- V_df %>%
 ```
 
 
-Algunas dimensiones capturan parte del gusto general por las
+Algunas dimensiones capturan en parte el gusto general por las
 películas, por ejemplo:
 
 
@@ -1151,26 +1151,42 @@ ggplot(sample_n(latentes_pelis, 500), aes(y = features_1, x = media_peli - mean(
 
 
 ```{r}
-arrange(latentes_pelis, features_2) %>% 
-  select(nombre, features_2, media_peli, num_calif_peli) %>% 
-  filter(num_calif_peli > 500) %>% 
+feature <- quo(features_1)
+arrange(latentes_pelis, !!feature) %>% 
+  select(nombre, !!feature, media_peli, num_calif_peli) %>% 
+  filter(num_calif_peli > 2000) %>% 
   head(100) 
-arrange(latentes_pelis, features_2) %>% 
-  select(nombre, features_2, media_peli, num_calif_peli) %>%
-  filter(num_calif_peli > 500) %>% 
+arrange(latentes_pelis, !!feature) %>% 
+  select(nombre, !!feature, media_peli, num_calif_peli) %>% 
+  filter(num_calif_peli > 2000) %>% 
   tail(100)
 ```
 
 ```{r}
-arrange(latentes_pelis, features_4) %>% 
-  select(nombre, features_4, media_peli, num_calif_peli) %>% 
-  filter(num_calif_peli > 500) %>% 
+feature <- quo(features_2)
+arrange(latentes_pelis, !!feature) %>% 
+  select(nombre, !!feature, media_peli, num_calif_peli) %>% 
+  filter(num_calif_peli > 2000) %>% 
   head(100) 
-arrange(latentes_pelis, features_4) %>% 
-  select(nombre, features_4, media_peli, num_calif_peli) %>% 
-  filter(num_calif_peli > 500) %>% 
+arrange(latentes_pelis, !!feature) %>% 
+  select(nombre, !!feature, media_peli, num_calif_peli) %>% 
+  filter(num_calif_peli > 2000) %>% 
   tail(100)
 ```
+
+
+```{r}
+feature <- quo(features_3)
+arrange(latentes_pelis, !!feature) %>% 
+  select(nombre, !!feature, media_peli, num_calif_peli) %>% 
+  filter(num_calif_peli > 2000) %>% 
+  head(100) 
+arrange(latentes_pelis, !!feature) %>% 
+  select(nombre, !!feature, media_peli, num_calif_peli) %>% 
+  filter(num_calif_peli > 2000) %>% 
+  tail(100)
+```
+
 
 ```{r}
 sparklyr::spark_disconnect_all()
@@ -1305,7 +1321,7 @@ $$
 
 Para los sesgos, las actualizaciones son (no regularizamos la media global):
 
-$$mu^{(n+1)} = mu^{(n)} + \gamma e_{i,j}$$
+$$\mu^{(n+1)} = \mu^{(n)} + \gamma e_{i,j}$$
   
 $$a_i^{(n+1)} = a_i^{(n)} + \gamma \left ( e_{i,j} - \frac{\lambda}{n_i} a_i^{(n)} \right )$$
   
@@ -1411,11 +1427,11 @@ a[is.nan(a)] <- 0
 b <- colSums(X)/colSums(X>0) -  mean(y)
 print(sqrt(calc_error(i, j, y, U, V, mu, a, b)))
 
-for(iter in 1:15){
+for(iter in 1:10){
   # nota: la función descenso_gradiente (C++) no hace copias de U,V,a,b
   # cambia in-place estos parámetros
   salida <- descenso_estocastico(i, j, y, U, V, mu, a, b, 
-              gamma = 0.003, lambda_mat = 5, lambda_sesgos = 5,
+              gamma = 0.005, lambda_mat = 10, lambda_sesgos = 10,
               n_iter = 1, num_peli, num_usu)
   error_entrena <- sqrt(calc_error(i, j, y, U, V, mu, a, b))
   error_valida <- sqrt(calc_error(i_val, j_val, y_val, U, V, mu, a, b))
@@ -1434,7 +1450,7 @@ prefs <- data_frame(prefs = prefs_1, peli_id = 1:17770) %>%
   left_join(medias_pelis, by = 'peli_id') %>%
   arrange(desc(prefs)) %>% 
   filter(num_calif_peli > 500) %>%
-  select(nombre, prefs) %>% top_n(100, prefs) 
+  select(peli_id, nombre, prefs) %>% top_n(100, prefs) 
  DT::datatable(prefs)
 ```
 
@@ -1590,7 +1606,7 @@ Nótese la diferencia con el caso explícito. En este caso, los valores
 de $c_{ij}$ (confianza) actúan como un pesos en el ajuste de
 los factores, indicando que valores altos de $r_{ij}$ son más informativos y
 deben contribuir más en el ajuste, sin descalificar que un
-artìculo con $r_{ij$ bajo puede ser preferido. Adicionalmente, los valores
+artìculo con $r_{ij}$ bajo puede ser preferido. Adicionalmente, los valores
 para los cuales $p_{ij}=0$ son los que reciben el peso mínimo ($c_{ij}=1$).
 
 Igual que en los ejemplos anteriores, usualmente se agregan términos
