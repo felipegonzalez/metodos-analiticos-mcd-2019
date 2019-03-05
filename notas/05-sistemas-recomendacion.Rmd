@@ -674,7 +674,7 @@ calculando similitud entre *items*, centrando por usuario, y esto no
 es lo mismo que correlación entre columnas.
 
 
-### Ejemplo: ¿cómo se ven las calificaciones de películas similares/no similares {-}
+### Ejemplo: ¿cómo se ven las calificaciones de películas similares/no similares? {-}
 
 Centramos las calificaciones por usuario y seleccionamos tres películas que
 pueden ser interesantes.
