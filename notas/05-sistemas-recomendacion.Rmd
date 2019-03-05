@@ -848,7 +848,7 @@ gustos <- u%*%t(v)
 gustos
 ```
 
-Así que al usuario 1 le recomndamos la película 3, pero al usuario 3 le recomendamos la película 1.
+Así que al usuario 1 le recomendamos la película 3, pero al usuario 3 le recomendamos la película 1.
 
 ---
 
