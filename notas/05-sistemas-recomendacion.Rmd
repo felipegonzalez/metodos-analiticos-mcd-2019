@@ -666,11 +666,12 @@ sim_cos(mat.c[,1], mat.c[,6])
 
 
 **Observación**:
+
 - Hacer este supuesto de valores $0$ cuando no tenemos evaluación no es lo mejor, pero 
 como centramos por usuario tiene más sentido hacerlo. Si utilizaramos las calificaciones
 no centradas, entonces estaríamos suponiendo que las no evaluadas están calificadas muy mal ($0$, por abajo de $1$,$2$,$3$,$4$,$5$).
-- Si calculamos similitud entre *usuarios* de esta forma, las distancia coseno es simplemente el coeficiente de correlación. Nótese que estamos
-calculando similitud entre *items*, centrando por usuario, y esto no
+
+- Si calculamos similitud entre *usuarios* de esta forma, las distancia coseno es simplemente el coeficiente de correlación. Nótese que estamos calculando similitud entre *items*, centrando por usuario, y esto no
 es lo mismo que correlación entre columnas.
 
 
