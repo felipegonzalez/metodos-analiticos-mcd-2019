@@ -1133,21 +1133,11 @@ películas.
 ```{r}
 latentes_pelis <- V_df %>% 
   left_join(pelis_nombres %>% left_join(medias_peliculas) %>% rename(id = peli_id))
-```
-
-
-Algunas dimensiones capturan en parte el gusto general por las
-películas, por ejemplo:
-
-
-```{r}
 latentes_pelis <- latentes_pelis %>% 
     mutate(num_grupo = ntile(num_calif_peli, 10))
-ggplot(sample_n(latentes_pelis, 500), aes(y = features_1, x = media_peli - mean(latentes_pelis$media_peli), 
-    colour = log10(num_calif_peli))) +
-  geom_point() 
 ```
 
+Para la primera dimensión latente:
 
 
 ```{r}
@@ -1161,6 +1151,8 @@ arrange(latentes_pelis, !!feature) %>%
   filter(num_calif_peli > 2000) %>% 
   tail(100)
 ```
+
+La segunda dimensión latente:
 
 ```{r}
 feature <- quo(features_2)
