@@ -303,7 +303,7 @@ ggplot(muestra_res, aes(x=factor(usuario_id), y = media_calif,
   theme(axis.text.x=element_blank())
 ```
 
-Y notamos que hay unos usuarios que tienen promedios por encima de $4.5$, mienstras que otros
+Y notamos que hay unos usuarios que tienen promedios por encima de $4.5$, mientras que otros
 califican por debajo de $3$ en promedio. Aunque esto puede deberse a las películas que han visto,
 generalmente una componente de esta variabilidad se debe a cómo usa la escala cada usuario.
 
