@@ -1494,10 +1494,10 @@ ggplot(V_df, aes(x = V1, y= V2, label=nombre)) +
 
 
 Para tener desempeño equivalente los ganadores del concurso de Netflix
-([@Bellkor]),
+[@Bellkor],
 todavía faltan algunos elementos:
 
-- A partir de 2004, hubo mejoras a la interfaz de Netflix. Esto provocó
+- A partir de $2004$, hubo mejoras a la interfaz de Netflix. Esto provocó
 un incremento general en las calificaciones. Este es un factor (el tiempo),
 que es necesario incluir en el modelo como término adicional (si la calificación
 es antes o después del cambio).
@@ -1532,8 +1532,8 @@ y otros (ver por ejemplo [este artículo](https://amba-bigdata.wikispaces.com/fi
 Esta sección está basada en [@recomendacion-implicita].
 
 En el ejemplo que vimos arriba, la retroalimentación es expícita en el 
-sentido de que los usuarios califican los artículos (1- no me gustó nada,
-hasta 5- me gustó mucho). Sin embargo, es común encontrar casos
+sentido de que los usuarios califican los artículos ($1-$ no me gustó nada,
+hasta $5-$ me gustó mucho). Sin embargo, es común encontrar casos
 donde no existe esta retroalimentación explícita, y solo tenemos medidas
 del gusto implícito, por ejemplo:
 
@@ -1546,8 +1546,8 @@ Estos datos tienen la ventaja de que describen acciones del usuario,
 en lugar de un rating que puede estar influido por sesgos de imagen
 o de la calificación que "debería" tener un artículo además 
 de la preferencia: quizá
-disfruto muchísimo *Buffy the Vampire Slayer*, pero lo califico con un 3,
-aunque un documental de ballenas que simplemente me gustó le pongo un 5.
+disfruto muchísimo *Buffy the Vampire Slayer*, pero lo califico con un $3$,
+aunque un documental de ballenas que simplemente me gustó le pongo un $5$.
 En los datos implícitos se vería de todas formas mi consumo frecuente
 de *Buffy the Vampire Slayer*, y quizá unos cuantos de documentales 
 famosos.
@@ -1575,15 +1575,15 @@ la variable de preferencia
 
 $$p_{ij} = 
 \begin{cases}
-1 &\mbox{si } r_{ij}>0\\ 
-0 &\mbox{si } r_{ij}=0\\
+1, &\mbox{si } r_{ij}>0,\\ 
+0, &\mbox{si } r_{ij}=0.\\
 \end{cases}$$
 
 Esta variable $p_{ij}$, cuando vale uno, indica algún nivel de preferencia.
 ¿Pero qué tanto valor debemos darle a esta preferencia? Definimos la confianza
 como
 $$c_{ij} = 1+ \alpha r_{ui},$$
-donde $\alpha$ es un parámetro que hay que afinar (por ejemplo $\alpha$ entre 1 y 50). Para predicciones de vistas de TV, en [@recomendacion-implicita] utilizan
+donde $\alpha$ es un parámetro que hay que afinar (por ejemplo $\alpha$ entre $1$ y $50$). Para predicciones de vistas de TV, en [@recomendacion-implicita] utilizan
 $\alpha = 40$, donde $r_{ij}$ es el número de veces que el usuario ha visto
 un programa (contando vistas parciales, así que es un número real).
 
@@ -1635,14 +1635,14 @@ que es lo mismo que la ecuación anterior pero ponderando por el interés mostra
 en cada artículo con $p_{ij}=1$.
 
 - Menores valores de $rank$ son mejores.
-- Si escogemos al azar el ordenamiento de los artículos, el valor esperado de $rank_{ij}$ es 0.5 (en medio de la lista), lo que implica que el valor esperado
-de $rank$ es 0.50. Cualquier modelo con $rank\geq 0.5$ es peor que dar recomendaciones al azar.
+- Si escogemos al azar el ordenamiento de los artículos, el valor esperado de $rank_{ij}$ es $0.5$ (en medio de la lista), lo que implica que el valor esperado
+de $rank$ es $0.50$. Cualquier modelo con $rank\geq 0.5$ es peor que dar recomendaciones al azar.
 
 Esta cantidad la podemos evaluar en entrenamiento y en validación. Para construir
 el conjunto de validación podemos hacer:
 
-- Escogemos un número de usuarios para validación (por ejemplo 20\%)
-- Ponemos 50\% de los artículos evaluados por estas personas en validación, por ejemplo.
+- Escogemos un número de usuarios para validación (por ejemplo $20\%$)
+- Ponemos $50\%$ de los artículos evaluados por estas personas en validación, por ejemplo.
 
 Estas cantidades dependen de cuántos datos tengamos, como siempre, para tener
 un tamaño razonable de de datos de validación.
