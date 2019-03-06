@@ -1645,6 +1645,6 @@ el conjunto de validación podemos hacer:
 - Ponemos 50\% de los artículos evaluados por estas personas en validación, por ejemplo.
 
 Estas cantidades dependen de cuántos datos tengamos, como siempre, para tener
-un tamaño razonable de de datos de validación.
+un tamaño razonable de datos de validación.
 
 
