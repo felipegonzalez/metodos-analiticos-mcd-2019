@@ -7,7 +7,7 @@ cb_palette <- c("#000000", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2"
 ```
 
 
-En explicamos como hacer la búsqueda de pares
+En esta sección explicamos como hacer la búsqueda de pares
 similares, y después mostraremos cómo aplicar
 estas técnicas para otras medidas de distancia  (como distancia
 euclideana y coseno). 
@@ -24,7 +24,7 @@ y basta examinar los elementos que compartan cubeta con otros elementos
 
 En la sección anterior dimos la primera idea como usar
 la *técnica de bandas* con minhashes para encontrar documentos de similitud alta, con distintos umbrales de similitud alta. Aquí describimos un análisis
-más detallado de la técncia
+más detallado de la técnica
 
 ```{block2 , type='resumen'}
 Supongamos que tenemos un total de $k$ minhashes, que dividimos
@@ -47,8 +47,7 @@ particular es $s$, la similitud de Jaccard.
 2. La probabiliad de que todos los hashes de una banda coincidan es
 $s^r$, pues seleccionamos los hashes independientemente. 
 3. Así que la probabilidad de que los documentos no coincidan en una banda
-particular es:
-es $1-s^r$
+particular es: $1-s^r$
 4. Esto implica que la probabilidad de que los documentos no coincidan en ninguna banda es $(1-s^r)^b$.
 5. Finalmente, la probabilidad de que estos dos documentos sean un par candidato es $1-(1-s^r)^b$, que es la probabilidad de que coincidan en al menos una banda.
 
@@ -157,14 +156,18 @@ params_umbral <- function(num_hashes, umbral_inf = 0.0, umbral_sup = 1.0){
 }
 
 combinaciones_50 <- params_umbral(50, 0.4, 0.7)
-graficar_curvas(combinaciones_50) 
+graficar_curvas(combinaciones_50) + 
+  geom_vline(xintercept = 0.4, lty=2) + 
+   geom_vline(xintercept = 0.7, lty=2) 
 ```
 
 Con $200$ hashes podemos obtener curvas con mayor pendiente:
 
 ```{r, fig.width=5, fig.asp=0.6}
 combinaciones_200 <- params_umbral(200, 0.2, 0.8)
-graficar_curvas(combinaciones_200) 
+graficar_curvas(combinaciones_200) + 
+  geom_vline(xintercept = 0.2, lty=2) + 
+   geom_vline(xintercept = 0.8, lty=2)
 ```
 
 **Observación**: La decisión de los valores para estos parámetros
@@ -215,7 +218,7 @@ En este ejemplo intentamos encontrar artículos similares de [wikipedia](http://
 usaremos categorías a las que pertenecen. Dos artículos tienen similitud alta cuando los conjuntos de categorías a las que pertenecen es similar.
 (este el [ejemplo original](https://github.com/elmer-garduno/metodos-analiticos/blob/master/Lecture_2_Similarity_Spark.ipynb)).
 
-Empeamos con una muestra de los datos:
+Empezamos con una muestra de los datos:
 
 ```{r, engine='bash'}
 head -20 ../datos/similitud/wiki-100000.txt
@@ -583,7 +586,7 @@ revisar otras técnicas en [@mmd], Sección 3.9
 
 ### Ejemplo {-}
 
-En el caso de artículos de wikipedia vimos algunas cubetas que
+En el caso de artículos de wikipedia vimos algunas cubetas de
 artículos que contenían exactamente las mismas categorías. Podríamos
 hacer, por ejemplo:
 
@@ -865,11 +868,11 @@ Si la dirección de corte separa a $x$ y $y$, entonces sus valores
 $f_v(x)$ y $f_v(y)$ no coinciden, y coinciden si la dirección
 no separa a $x$ y $y$. Así que:
 
-1. $d(x,y)=d_1=\theta$, entonces $P(f(x)=f(y)) = d_1/180.$
+1. $d(x,y)=d_1=\theta$, entonces $P(f(x)=f(y)) = 1-d_1/180.$
 
 Por otro lado, 
 
-2. $d(x,y)=d_2$, entonces  $P(f(x)\neq f(y)) = 1-d_2/180.$
+2. $d(x,y)=d_2$, entonces  $P(f(x)\neq f(y)) = d_2/180.$
 
 ---
 
@@ -920,7 +923,7 @@ df_pares
 
 La distribución de distancias sobre todos los pares es la siguiente:
 (¿por qué observamos este patrón? Recuerda que esta gráfica
- representa pares):
+ representa pares:
 
 ```{r, fig.width=5, fig.asp = 0.8}
 qplot(df_pares$dist, binwidth = 0.01)
@@ -971,7 +974,7 @@ df_hash
 
 
 Vamos a amplificar la famiia de hashes. En este caso,
-escogemos $20$ bandas de $10$ bandas cada una.
+escogemos $20$ bandas de $10$ hashes cada una.
 
 ```{r, fig.width=5, fig.asp=0.8}
 f_1 <- function(x){
@@ -1060,7 +1063,7 @@ que es un porcentaje bajo del total de pares reales.
 
 
 **Observación*: es posible, en lugar de usar vectores con dirección
-aleatoria $v$ escogidos al azar como arriba (con la distribución normal), hacer ménos cálculos escogiendo vectores $v$
+aleatoria $v$ escogidos al azar como arriba (con la distribución normal), hacer menos cálculos escogiendo vectores $v$
 cuyas entradas son solamente $1$ y $-1$. El cálculo del producto
 punto es simplemente multiplicar por menos si es necesario los
 valores de los vectores $x$ y sumar.
@@ -1076,13 +1079,13 @@ hash de un punto $x$ es el número de cubeta donde cae la proyección de $x$.
 
 ```{block2, type='resumen'}
 Supogamos que tomamos como $a$ el ancho de las cubetas.
-La familia de proyecciones aleatorios por cubetas es
+La familia de proyecciones aleatorias por cubetas es
 una familia
 $(a/2, 2a, 1/2, 1/3)$-sensible a la localidad para la distancia 
 euclideana.
 ```
 
-Supongamos que dos punto $x$ y $y$ tienen distancia euclideana
+Supongamos que dos puntos $x$ y $y$ tienen distancia euclideana
 $d = a/2$. Si proyectamos perpendicularmente sobre la línea
 escogida al azar, la distancia entre las proyecciones es menor
 a $a/2$, de modo la probabilidad de que caigan en la misma
