@@ -23,7 +23,7 @@ Para analizar flujos con estas propiedades podemos hacer:
 Dependiendo de qué nos interesa medir en un flujo podemos decidir cuáles
 son las unidades que es necesario muestrear. Típicamente la unidad de un
 flujo no corresponde a las unidades que nos interesan. Por ejemplo: en *logs*
-de sitios web, las unidades observamos en el flujo son transacciones muy granulares (clicks, movimientos de mouse, envío de datos, etc.), pero nos interesa obtener
+de sitios web, las unidades que observamos en el flujo son transacciones muy granulares (clicks, movimientos de mouse, envío de datos, etc.), pero nos interesa obtener
 propiedades a nivel de usuario, o sesión, etc.
 
 Dependiendo de las unidades de muestreo apropiadas que nos
@@ -137,7 +137,7 @@ sprintf("Mediana de máximo monto: %.1f", mediana_max)
 ¿Cómo funciona si quisiéramos usar una muestra? Usamos una función hash y 
 repartimos en $10$ cubetas (deberíamos
 obtener alrededor del $10\%$ de los clientes). Seleccionamos una sola cubeta
-y usamos para resumir:
+y la usamos para resumir:
 
 ```{r}
 seleccionar <- function(id){
@@ -155,7 +155,7 @@ sprintf("Mediana de máximo monto: %.1f", mediana_max)
 ```
 
 
-Sin embargo, esto no funciona si seleccionamos al azar las transacciones, obtenemos
+Sin embargo, esto no funciona si seleccionamos al azar las transacciones. En este caso, obtenemos
 una mala estimación con sesgo alto:
 
 ```{r}
@@ -190,7 +190,7 @@ que se hacen en comercios donde han existido fraudes anterioremente,
 o quizá checar si un correo proviene de una dirección que está 
 en una whitelist (o blacklist).
 
-En estos ejemplo, 
+En estos ejemplos, 
 tenemos que checar contra la lista $S$ si seleccionamos un elemento o no, a
 diferencia de los ejemplos de arriba.
 Cuando la lista es muy grande, esta operación puede ser costosa. 
@@ -361,7 +361,7 @@ y el número de funciones hash $k$, dependiendo
 del número de elementos que tenemos que almacenar. De estas dos contidades,
 y del tamaño del conjunto $S$, depende la tasa de falsos positivos.
 
-Supongamos como aproximación que una función hash, al aplicar a una $x$ dada,
+Supongamos como aproximación que una función hash, al aplicarla a una $x$ dada,
 selecciona
 una de las entradas del vector de bits con la misma probabilidad. 
 La probabilidad de que un
@@ -688,7 +688,7 @@ Consideramos $k=100$, y observamos un flujo sintético dado como sigue:
 N <- 100000
 n_0 <- 1000
 set.seed(103)
-lambda <- 10*abs(sin(1:N/200)) 
+
 datos <- data_frame(n = 1:N, res = rnorm(N)) %>% mutate(obs = cumsum(res))
 ggplot(datos %>% filter(n < n_0), aes(x = n, y = obs, colour = factor((n_0 - n) < 50))) +
   geom_line()
@@ -750,7 +750,7 @@ cada elemento nuevo del flujo, decidir si es nuevo, agregarlo a la estructura,
 y contar. Sin embargo, si el número de elementos distintos es grande, esta
 estrategia puede requierir mucha memoria y procesamiento. Un filtro de bloom 
 no es del todo adecuado, pues confrome vayamos
-llenando de 1´s el su vector, la tasa de falsos positivos irá incrementando (en el 
+llenando de 1´s el vector, la tasa de falsos positivos irá incrementando (en el 
 límite es 1).
 
 Una alternativa es usar algoritmos probabilísticos, que utilicen mucha menos
@@ -890,14 +890,14 @@ tail(df)
 
 ```{r}
 ggplot(df, aes(x = num_distintos, y = 2^max_tail_1)) + 
-  geom_abline(slope=1, xintercept = 0, colour = "red") + 
+  geom_abline(slope=1, intercept = 0, colour = "red") + 
   geom_point() +
   scale_x_log10() + scale_y_log10()
 ```
 
 ```{r}
 ggplot(df, aes(x = num_distintos, y = 2^max_tail_2)) + 
-  geom_abline(slope=1, xintercept = 0, colour = "red") + 
+  geom_abline(slope=1, intercept = 0, colour = "red") + 
   geom_point() +
   scale_x_log10() + scale_y_log10()
 ```
@@ -948,7 +948,7 @@ a valores grandes y atípicos, igual que la media geométrica).
 - Intuitivamente, cuando dividimos en $m$ cubetas un flujo de $n$ elementos, cada flujo
 tiene aproximadamente $n/m$ elementos. Como vimos arriba, lo más probable
 es que la cola máxima en cada cubeta sea aproximadamente $\log_2(n/m)$. El promedio
-armónico $a$ de $m$ cantidades $(n/m)$ de esta cantidad entonces debería estar ser
+armónico $a$ de $m$ cantidades $(n/m)$ de esta cantidad entonces debería ser
 del orden en $n/m$, así que la estimación final de la cardinalidad del flujo
 completo es $ma$ (el número de cubetas multiplicado por el promedio armónico). 
 - Existen varias correcciones adicionales para mejorar su error en distintas circunstancias (dependiendo del número de elemntos únicos que estamos contando, por ejemplo). Una típica
@@ -1050,7 +1050,7 @@ hashes de $64$ bits en lugar de $32$).
 
 - Las operaciones necearias son: aplicar la función hash, calcular cubeta, y actualizar
 el máximo de las cubetas. La única estructura que es necesario mantener es
-los máximos de las colas dentro de cada cubeta. que se actualiza secuencialmente.
+los máximos de las colas dentro de cada cubeta que se actualiza secuencialmente.
 
 ### Implementación de spark 
 
