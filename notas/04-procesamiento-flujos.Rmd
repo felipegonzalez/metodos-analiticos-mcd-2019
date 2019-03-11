@@ -1064,6 +1064,10 @@ df_tbl %>%
   summarise(unicos_hll = approx_count_distinct(id)) # error estándar relativo 0.05
 ```
 
+```{r}
+spark_disconnect_all()
+```
+
 ### Tarea
 
 - Resuelve los dos ejercicios pendientes (uno en filtro de Bloom, otro en las sección de muestras uniformemente distribuidas
