@@ -97,7 +97,7 @@ y resumen de redes.
 
 ## Visualización de redes
 
-Existen varios algoritmos para visualizar redes que revelan distintos aspectos de su estructura (ver por ejemplo *?layout* en R, en el paquete igraph). 
+Existen varios algoritmos para visualizar redes que revelan distintos aspectos de su estructura (ver por ejemplo *?layout* en R, en el paquete *igraph*). 
 
 Por ejemplo, aquí construimos una red aleatoria, y hacemos un *layout* de
 nodos aleatorio:
@@ -119,15 +119,15 @@ ggraph(g, layout = 'fr') + geom_edge_link() +
 ```
 
 ```{block2, type='resumen'}
-Los algoritmos basados en fuerzas para representar redes en 2 o 3 dimensiones se basan principalmente en la siguiente idea:
+Los algoritmos basados en fuerzas para representar redes en $2$ o $3$ dimensiones se basan principalmente en la siguiente idea:
 
 - Las aristas actúan como resortes, que no permiten que nodos ligados se alejen mucho
 - Los nodos tienen fuerzas de repulsión entre ellos (la analogía física es de cargas elécricas), y también a veces de gravedad entre ellos.
 - El algoritmo de representación intenta minimizar la energía de la configuración del sistema de atracciones y repulsiones.
 ```
 
-Hay muchas variaciones de estos algoritmos, por ejemplo: *graphopt* en igraph, 
-fruchtermann-rheingold, kamada-kawai, gem, escalamiento multidimensional, forceAtlas,
+Hay muchas variaciones de estos algoritmos, por ejemplo: *graphopt* en *igraph*, 
+*fruchtermann-rheingold*, *kamada-kawai*, *gem*, *escalamiento multidimensional*, *forceAtlas*,
 etc. Intenta mover los nodos de las siguiente gráfica para entender el funcionamiento
 básico de estos algoritmos:
 
@@ -285,10 +285,10 @@ graficar_red_nd(red_4) + labs(subtitle = 'Betweeness')
 ```
 
 Por ejemplo, consideremos el nodo $B$. Hay dos caminos más
-cortos de $C$ a $F$ (de tamaño) 2, y uno de ellos pasa por $B$. 
-De modo que los caminos de $C$ a $F$ aportan 0.5 al *betweeness*
+cortos de $C$ a $F$ (de tamaño) $2$, y uno de ellos pasa por $B$. 
+De modo que los caminos de $C$ a $F$ aportan $0.5$ al *betweeness*
 de $B$. De los caminos más cortos entre $E$ y $D$, ninguno pasa
-por $B$, así que este par de vértices aporta 0 al *betweeness*.
+por $B$, así que este par de vértices aporta $0$ al *betweeness*.
 Verifica el valor de betweeness para $B$ haciendo los cálculos
 restantes:
 
@@ -331,7 +331,7 @@ En este ejemplo, el nodo $F$ tiene cercanía más alta que $D$, por ejemplo,
 pues se conecta a un nodo bien conectado de la red (en grado y betweeness):
 
 #### Ejercicio {-}
-Verifica que la cercanía de $A$ es 0.80.
+Verifica que la cercanía de $A$ es $0.80$.
 
 ### Centralidad de eigenvector
 
@@ -350,7 +350,7 @@ red_6 <- igraph::graph(c(1,2,1,3,1,4,5,2), directed = FALSE) %>%
 graficar_red_nd(red_6) + theme(legend.position="none")
 ```
 
-Supongamos que las importancias  de estos 5 nodos son
+Supongamos que las importancias  de estos $5$ nodos son
 $$(x_1,\ldots, x_5)$$
 donde $x_i\geq 0$.  
 
@@ -363,7 +363,7 @@ $${y_1} = x_2 + x_3 + x_4$$
 
 
 
-para el nodo 2 
+para el nodo $2$ 
 
 $$y_2 = x_1 + x_5$$
 
@@ -427,7 +427,7 @@ mapea el cono $\{(x_1,x_2,\ldots, x_m) | x_i \geq 0\}$ dentro de sí mismo,
 lo que implica que debe dejar invariante alguna dirección dentro de este cono.
 
 Si este vector propio no-negativo fuera único (hasta normalización) y distinto del
-vector 0, entonces esto nos daría un conjunto de medidas (únicas hasta normalización) $x$ para la importancia de los nodos:
+vector $0$, entonces esto nos daría un conjunto de medidas (únicas hasta normalización) $x$ para la importancia de los nodos:
 
 #### Ejemplo 1 {-}
 
@@ -466,7 +466,7 @@ A_red
 ```
 
 
-Nótese que los eigenvectores 1 y 2 son no negativos, y están asociados a 
+Nótese que los eigenvectores $1$ y $2$ son no negativos, y están asociados a 
 vectores propios no negativos:
 ```{r}
 desc_A <- eigen(A_red)
@@ -479,7 +479,7 @@ ejemplo, la unicidad no sucede pues la red asociado no es conexa.
 
 ### Matrices irreducibles y gráficas fuertemente conexas {-}
 
-¿Cuándo podemos garantizar unicidad en la solución de $Ax=\lambda x$ con $\lambda >0$ y qeu $x$ sea un vector no-negativo distinto de 0?
+¿Cuándo podemos garantizar unicidad en la solución de $Ax=\lambda x$ con $\lambda >0$ y que $x$ sea un vector no-negativo distinto de $0$?
 
 Sea $A$ la matriz de adyacencia de una gráfica **no dirigida**.
   
@@ -560,7 +560,7 @@ visNetwork(nodos, dat_1 %>% select(-weight),
   visNodes(value = 1, scaling = list(min = 1, max = 200))
 ```
 
-Podemos calcular también usando gggraph:
+Podemos calcular también usando *gggraph*:
 
 ```{r}
 uk_tbl <- ukf.und %>% as_tbl_graph() %>%
@@ -582,10 +582,10 @@ ggraph(uk_tbl, layout = 'fr') +
 
 Estos conceptos pueden generalizarse para gráficas dirigidas, cuando hay un concepto de dirección en las relaciones de los nodos.
 
-- In degree, out degree
+- In degree, out degree.
 - Betweenness puede definirse en función de caminos dirigidos.
-- Cercanía también (in closeness, out closeness)
-- Centralidad de eigenvector: misma idea, pero la matriz $A$ no es simétrica. En este caso, $A_{ij} = 1$ cuando hay una arista que va de $i$ a $j$
+- Cercanía también (in closeness, out closeness).
+- Centralidad de eigenvector: misma idea, pero la matriz $A$ no es simétrica. En este caso, $A_{ij} = 1$ cuando hay una arista que va de $i$ a $j$.
 
 Consideremos en particular cómo se calcula la centralidad de eigenvector para una red dirigida.
 
@@ -603,13 +603,13 @@ A
 ```
 
 
-Para este ejemplo, las ecuaciones de importancia son como sigue. Para el nodo 1,
+Para este ejemplo, las ecuaciones de importancia son como sigue. Para el nodo $1$,
 $$\lambda x_1 = x_2 + x_4 + x_5$$
 para el nodo 5, por ejemplo, es
 $$\lambda x_5 = x_1 + x_2 + x_3$$
 y así sucesivamente.
 
-Obsérvese que en cada ecuación se consideran las aristas *entrantes*, de forma que la ecuación del nodo 1 requiere la columna 1 de la matriz de adyacencia, el nodo 2 la columna 2, etc. Es decir, la ecuación que debemos resolver es
+Obsérvese que en cada ecuación se consideran las aristas *entrantes*, de forma que la ecuación del nodo $1$ requiere la columna $1$ de la matriz de adyacencia, el nodo $2$ la columna $2$, etc. Es decir, la ecuación que debemos resolver es
 
 $$A^t x = \lambda x$$
 
@@ -634,7 +634,7 @@ Y podemos igualmente aplicar Perron-Frobenius, de donde concluimos:
 
 
 ```{block2 , type='resumen'}
-Si $A$ es irreducible, entonces $\lambda_0 > 0$ es un eigenvector simple de A, un vector propio asociado $x$ tiene entradas positivas, y no existe ningún otro vector propio con entradas no negativas que no sea paralelo a $x$
+Si $A$ es irreducible, entonces $\lambda_0 > 0$ es un eigenvector simple de $A$, un vector propio asociado $x$ tiene entradas positivas, y no existe ningún otro vector propio con entradas no negativas que no sea paralelo a $x$.
 ```
 
 
@@ -648,7 +648,7 @@ de ellas contradice algún aspecto del teorema de Perron Frobenius.
 
 Por ejemplo, si la gráfica es conexa pero no fuertemente conexa,
 podemos tener vectores propios no positivos (algunos nodos resultan
-con peso 0):
+con peso $0$):
 
 ```{r fig.width=3, fig.asp=1, out.width="200px", out.height="200px"}
 red <- igraph::graph(c(1,2,2,3,3,4,4,3), directed = TRUE)
@@ -713,7 +713,7 @@ A
 ```
 
 
-Y calculamos la matriz M, que es la matriz A con los renglones normalizados por
+Y calculamos la matriz M, que es la matriz $A$ con los renglones normalizados por
 su suma:
 ```{r}
 M <- A / Matrix::rowSums(A)
@@ -723,7 +723,7 @@ M
 ### La matriz $M$ es estocástica
 
 A la matriz $M$ le llamamos una **matriz estocástica**, pues cada uno
-de sus renglones son no negativos y suman 1. Bajo este supuesto, es posible
+de sus renglones son no negativos y suman $1$. Bajo este supuesto, es posible
 demostrar otra versión del teorema de Perron Frobenius:
 
 ```{block2, type='resumen'}
@@ -768,10 +768,10 @@ plot(red_p, vertex.size=100*vec_1,
                           edge.curved=T, edge.arrow.size=0.5)
 ```
 
-¿Por qué 1 tiene mayor importancia que 3? Nótese que el nodo 3 tiene mayor grado que 1. La razón de
-que el pagerank de 1 es mayor que el de 3 es que la importancia
-del nodo 1 se diluye pues tiene grado 3 de salida, mientras
-que toda la importancia de 3 se comunica al nodo 1.
+¿Por qué $1$ tiene mayor importancia que $3$? Nótese que el nodo $3$ tiene mayor grado que $1$. La razón de
+que el pagerank de $1$ es mayor que el de $3$ es que la importancia
+del nodo $1$ se diluye pues tiene grado $3$ de salida, mientras
+que toda la importancia de $3$ se comunica al nodo $1$.
 
 
 ### Primeras dificultades
@@ -779,7 +779,7 @@ que toda la importancia de 3 se comunica al nodo 1.
 ¿Qué puede fallar cuando queremos encontrar el pagerank de un gráfica
 que representa sitios de internet, por ejemplo? 
  
-- Si existen **callejones sin salida** la matriz $M$ no es estocástica, pues tiene un renglón de ceros - no podemos aplicar la teoría de arriba. Por ejemplo, la siguiente matriz no tiene un valor propio igual a 1 (conclusión invalidada: hay un valor propio igual a 1):
+- Si existen **callejones sin salida** la matriz $M$ no es estocástica, pues tiene un renglón de ceros - no podemos aplicar la teoría de arriba. Por ejemplo, la siguiente matriz no tiene un valor propio igual a $1$ (conclusión invalidada: hay un valor propio igual a $1$):
 
 ```{r fig.width=3, fig.asp=1, out.width="200px", out.height="200px"}
 red_p <- igraph::graph(c(1,2,2,1,1,3))
@@ -791,8 +791,8 @@ M[3, ]  <- 0
 eigen(t(M))
 ```
 
-- Si existen **trampas de telaraña** (spider traps) entonces la matriz $M$ es estocástica, pero las soluciones concentran todo la importancia en la trampa (en este caso consiste de los nodos 1 y 2) (conclusión invalidada: el vector de importancias 
-asociado al eigenvalor 1 es positivo).
+- Si existen **trampas de telaraña** (spider traps) entonces la matriz $M$ es estocástica, pero las soluciones concentran todo la importancia en la trampa (en este caso consiste de los nodos $1$ y $2$) (conclusión invalidada: el vector de importancias 
+asociado al eigenvalor $1$ es positivo).
 
 ```{r fig.width=3, fig.asp=1, out.width="200px", out.height="200px"}
 red_p <- igraph::graph(c(1,2,2,1,3,1,3,4,4,5,5,3))
@@ -802,7 +802,7 @@ M <- t(scale(t(as.matrix(A)), center = FALSE, scale = apply(A,1,sum)))
 eigen(t(M))
 ```
 
-- La red puede ser **disconexa**.  Por ejemplo, cuando hay dos componentes irreducibles, existe más de un vector propio asociado al valor propio 1 (conclusión invalidada: la solución es única y el valor propio 1 es simple), así que hay tantas soluciones como combinaciones lineales de los eigenvectores que aparecen:
+- La red puede ser **disconexa**.  Por ejemplo, cuando hay dos componentes irreducibles, existe más de un vector propio asociado al valor propio $1$ (conclusión invalidada: la solución es única y el valor propio $1$ es simple), así que hay tantas soluciones como combinaciones lineales de los eigenvectores que aparecen:
 
 ```{r fig.width=3, fig.asp=1, out.width="200px", out.height="200px"}
 red_p <- igraph::graph(c(1,2,2,3,3,1,4,5,5,6,6,5,6,4))
@@ -822,7 +822,7 @@ Re(vec)
 En términos de nuestra solución para dar importancia de páginas:
 
 - No es razonable que nuestra solución concentre toda la importancia en spider traps.
-- Si la gráfica es disconexa no podemos dar importancia relativa a las componentes resultantes
+- Si la gráfica es disconexa no podemos dar importancia relativa a las componentes resultantes.
 - Si hay callejones sin salida entonces nuestra formulación no sirve.
 
 ---
@@ -881,7 +881,7 @@ Suponemos $\pi$ normalizado por la suma: $\sum_i \pi_i=1$.
 
 Sin embargo, en un principio no conocemos la distribución de
 equilibrio $\pi$. Lo que haríamos sería escoger un nodo al azar y comenzar
-a navegar desde ahí, o quizá empezaríamos en un nodo fijo, por ejemplo, el 1.
+a navegar desde ahí, o quizá empezaríamos en un nodo fijo, por ejemplo, el $1$.
 
 Una pregunta más interesante es entonces, 
 
@@ -895,7 +895,7 @@ no podemos contestar esta pregunta de manera simple.
 #### Ejemplo: periodicidad {-}
 
 Consideremos este ejemplo fuertemente conexo (irreducible), con un ciclo de
-tamaño 3:
+tamaño $3$:
 
 ```{r fig.width=3, fig.asp=1, out.width="200px", out.height="200px"}
 red_p <- igraph::graph(c(1,2,2,3,3,1))
@@ -905,15 +905,15 @@ M <- t(scale(t(as.matrix(A)), center=FALSE, scale=apply(A,1,sum)))
 M
 ```
 
-Y notamos que si comenzamos en el estado uno, la probabilidad de estar en cada estado al tiempo 2 es
+Y notamos que si comenzamos en el estado uno, la probabilidad de estar en cada estado al tiempo $2$ es
 ```{r}
 t(M) %*% c(1,0,0)
 ```
-En el tiempo 3:
+En el tiempo $3$:
 ```{r}
 t(M) %*% t(M) %*% c(1,0,0)
 ```
-En el tiempo 3:
+En el tiempo $3$:
 ```{r}
 t(M) %*% t(M) %*% t(M) %*% c(1,0,0)
 ```
@@ -944,7 +944,7 @@ y si sustituimos $P$
 $$P(X_3=j|X_1=i) =\sum_k P_{i,k} P_{k,j}. $$
 
 Como el lado derecho es la componente $i,j$ de $P^2$, tenemos que
-$P^2$ da las probabilidades de transición en 2 pasos.
+$P^2$ da las probabilidades de transición en $2$ pasos.
 
 Como ejercicio, calcula e interpreta $P^2$ para el ejemplo anterior.
 
@@ -1005,7 +1005,7 @@ Ahora construimos la matriz $M_1$ de este proceso. Sea $M$ la matriz original, q
 
 $$(M_1)_{i,j} = \alpha M_{ij} + (1-\alpha)\frac{1}{n}$$
 
-Esto es por probabilidad total: la probabilidad e i a j **dada** teletransportación es $1/n$, y la probabilidad de ir de i a j **dado** que no hubo teletransportación es $M_{ij}$ (que puede ser cero). La probabilidad total se calcula promediando estas dos probabilidades según la probabilidad de teletransportación o no.
+Esto es por probabilidad total: la probabilidad de ir de $i$ a $j$ **dada** teletransportación es $1/n$, y la probabilidad de ir de $i$ a $j$ **dado** que no hubo teletransportación es $M_{ij}$ (que puede ser cero). La probabilidad total se calcula promediando estas dos probabilidades según la probabilidad de teletransportación o no.
 
 Si $i$ es un spider-trap, entonces ponemos simplemente 
 $$(M_1)_{i,j} = 1/n$$
