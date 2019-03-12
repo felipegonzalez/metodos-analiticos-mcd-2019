@@ -257,7 +257,7 @@ graficar_red_nd(red_4)
 ```
 
 
-### Medida de centralidad: *Betweeness*.
+### Medida de centralidad: *Betweeness*
 
 La medida de centralidad *betweeness* de un nodo $i$ se define como:
 $$c_b (u) = \sum_{j<k, u\neq j,u\neq i} \frac{ g(j,k |u)}{ g(j,k)},$$
@@ -862,7 +862,7 @@ de ligas salientes de $i$.
 Es claro que $P$ es igual a la matriz $M$ que definimos con anterioridad. 
 
 
-### Distribución de equilibrio (versión simple).
+### Distribución de equilibrio (versión simple)
 
 La matriz $P$ es estocástica. Si suponemos que $P$ es irreducible (la gráfica es fuertemente conexa), entonces por la teoría que vimos arriba
 existe un vector $\pi > 0$ tal que $P^t\pi = \pi$.
@@ -877,7 +877,7 @@ Suponemos $\pi$ normalizado por la suma: $\sum_i \pi_i=1$.
 - Significa que si escogemos un estado al azar con probabilidad $\pi$, entonces, después de un salto, las probabilidades de encontrar al navegador en cada estado está dado también por $\pi$. 
 - Igualmente, la probabilidad de encontrar al navegador en cualquier momento en el estado $i$ es igual a $\pi_i$.
 
-### Distribución de equilibrio y probabilidades a largo plazo.
+### Distribución de equilibrio y probabilidades a largo plazo
 
 Sin embargo, en un principio no conocemos la distribución de
 equilibrio $\pi$. Lo que haríamos sería escoger un nodo al azar y comenzar
@@ -926,7 +926,7 @@ en la red del navegador aleatorio. Veremos ahora cómo lidiar
 con este problema.
 
 
-### Matriz de transición a $k$ pasos.
+### Matriz de transición a $k$ pasos
 
 Recordamos que la matriz $(P)^k$ da las probabilidades de transición
 a $k$ pasos. 
@@ -985,7 +985,7 @@ hasta que $||v_{n+1} -v_{n}||<\epsilon.$
 Veremos que este algoritmo simple es escalable a problemas muy grandes, pues
 sólo involucra multiplicar por una matriz que típicamente es rala.
 
-### Pagerank: teletransportación/perturbación de la matriz $M$.
+### Pagerank: teletransportación/perturbación de la matriz $M$
 
 Para que funcione este algoritmo, como vimos antes, tenemos
 que lidiar con los problemas que vimos arriba (spider traps, callejones sin salidas, falta de conexidad, periodicidad).
