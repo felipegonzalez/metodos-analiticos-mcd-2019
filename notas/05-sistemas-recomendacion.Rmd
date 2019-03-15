@@ -960,7 +960,7 @@ esperamos encontrar en el proceso de ajuste).
 
 
 Por ejemplo, supongamos que el gusto por las películas sólo depende de
-una dimensión seria - divertida. Si ajustamos un modelo de un solo
+una dimensión sería - divertida. Si ajustamos un modelo de un solo
 factor latente, un **mínimo** se alcanzaría separando con la dimensión latente
 las películas serias de las divertidas, y los usuarios que prefieren películas
 serias o divertidas. Esta sería una buena explicación de los datos observados,
