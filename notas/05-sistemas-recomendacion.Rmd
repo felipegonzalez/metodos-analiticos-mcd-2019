@@ -839,7 +839,7 @@ que dice que a los primeros dos usuarios les gustan las películas serias, al te
 
 Qusiéramos predecir el gusto usando estos dos vectores. Nuestras predicciones (considerando que $u$ y $v$ son matrices de una columna) serían simplemente
 
-$$\tilde{X} = u v^t$$
+$$\widetilde{X} = u v^t$$
 
 ```{r}
 u <- c(2,3,-3,0,1)
@@ -853,7 +853,7 @@ Así que al usuario $1$ le recomndamos la película $3$, pero al usuario $3$ le 
 ---
 
 La idea es entonces encontrar pesos para películas $u$ y para usuarios $v$ de forma que
-$X\approx \tilde{X} = uv^t$: podemos reproducir las calificaciones observadas a partir de nuestro modelo de factores latentes.
+$X\approx \widetilde{X} = uv^t$: podemos reproducir las calificaciones observadas a partir de nuestro modelo de factores latentes.
 
 Nótese sin embargo que hay varias dimensiones que pueden describir a películas y usuarios:
 por ejemplo, seria-divertida, artística-hollywood, ciencia ficción, con/sin violencia, etc. 
@@ -908,22 +908,22 @@ el usuario $j$ (descriptores de películas)
 ```{block2, type ="resumen"}
 Con $k$ dimensiones latentes, el modelo que proponemos es:
 
-$$\tilde{X} = UV^t$$
+$$\widetilde{X} = UV^t$$
 
 donde $U$ es una matrix de $n\times k$ ($n=$ número de usuarios), y $V$ es una matriz
 de $p \times k$, donde $p$ es el número de películas.
 
 Buscamos que, si $X$ son las verdaderas calificaciones, entonces
-$$X\approx \tilde{X}.$$
+$$X\approx \widetilde{X}.$$
 
-y nótese que esta aproximación es en el sentido de las entradas de $X$ que **son observadas**. Sin embargo, $\tilde{X}$ nos da predicciones para **todos los pares película-persona**.
+y nótese que esta aproximación es en el sentido de las entradas de $X$ que **son observadas**. Sin embargo, $\widetilde{X}$ nos da predicciones para **todos los pares película-persona**.
 ```
 
 
 Bajo este modelo, la predicción para el usuario $i$ y la película $j$
 es la siguiente suma sobre las dimensiones latentes:
 
-$$\tilde{x}_{ij} =\sum_k u_{ik} v_{jk}$$
+$$\widetilde{x}_{ij} =\sum_k u_{ik} v_{jk}$$
 
 que expresa el hecho de que el gusto de $i$ por $j$ depende de una combinación (suma)
 de factores latentes de películas ponderados por gusto por esos factores del usuario.
@@ -932,7 +932,7 @@ de factores latentes de películas ponderados por gusto por esos factores del us
 El número de factores latentes $k$ debe ser seleccionado (por ejemplo, según el error de validación). Dado $k$, para encontrar $U$ y $V$ (un total de $k(m+n)$ parámetros) buscamos
 minimizar 
 
-$$\sum_{(i,j)\, obs} (x_{ij}-\tilde{x}_{ij})^2,$$
+$$\sum_{(i,j)\, obs} (x_{ij}-\widetilde{x}_{ij})^2,$$
 
 
 que también podemos escribir este problema (recuérdese que $u_i$ y
@@ -975,9 +975,9 @@ Podemos usar también ideas de nuestro modelo base y modelar desviaciones en lug
 Si $X^0$ son las predicciones del modelo de referencia, y
 $$R = X-X^0$$
 son los residuales del modelo base, buscamos mejor
-$$R\approx \tilde{X} = UV^t$$
+$$R\approx \widetilde{X} = UV^t$$
 de manera que las predicciones finales son
-$$X^0 + \tilde{X}$$
+$$X^0 + \widetilde{X}$$
 
 Veremos también más adelante cómo regularizar estos sesgos como
 parte de la construcción del modelo.
