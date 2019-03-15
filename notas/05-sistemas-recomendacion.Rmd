@@ -534,7 +534,7 @@ en los que se usa una muestra de prueba separada, de películas vistas despúes 
 ### Ejercicio: regularización del modelo simple {-}
 
 No hemos resulto el problema de películas o usarios con pocas evaluaciones. Como vimos arriba,
-hay gran variablidad en los promedios de las películas con pocas evaluaciones, y esto produce
+hay gran variabilidad en los promedios de las películas con pocas evaluaciones, y esto produce
 error adicional en nuestras predicciones.
 
 ```{r}
