@@ -1210,7 +1210,7 @@ y los renglones de $V$ son los descriptores de las películas (ver sección ante
 \begin{equation}
 \min_{U,V} \sum_{(i,j) obs} (x_{ij} - u_iv_j^t)^2
 \end{equation}
-donde $u_i$ es el renglón $i-ésimo$ de $U$ y $v_j$ es el renglón
+donde $u_i$ es el renglón $i$-ésimo de $U$ y $v_j$ es el renglón
 $j$-ésimo de $V$. En términos de sus componentes, queremos minimizar
 
 \begin{equation}
