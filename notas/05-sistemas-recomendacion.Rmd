@@ -675,7 +675,7 @@ no centradas, entonces estaríamos suponiendo que las no evaluadas están califi
 es lo mismo que correlación entre columnas.
 
 
-### Ejemplo: ¿cómo se ven las calificaciones de películas similares/no similares {-}
+### Ejemplo: ¿cómo se ven las calificaciones de películas similares/no similares? {-}
 
 Centramos las calificaciones por usuario y seleccionamos tres películas que
 pueden ser interesantes.
