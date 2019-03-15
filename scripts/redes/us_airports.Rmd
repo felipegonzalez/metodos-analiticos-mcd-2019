@@ -1,0 +1,50 @@
+---
+title: "USAirports"
+output: html_notebook
+---
+
+Escoge una gráfica de tu interés (por ejemplo de moviegalaxies,
+o alguna del paquete *igraph*). 
+
+ - ¿Cuáles son los nodos más importantes? Considera betweeness, closeness,
+ centralidad de eigenvector.
+ - Grafica (ggraph o visNetwork) usando una algoritmo de fuerza y mostrando con tamaño y/o color las importancias. Si tu gráfica es muy grande puedes exportar a *gml* para utilizar Gephi (ver notas).
+
+Por ejemplo:
+
+Si consideramos los datos USairports del paquete *igraphdata*,
+donde los nodos son aeropuertos y las aristas indican si hubo
+vuelos entre los dos aeropuertos (el peso es el número de vuelos).
+
+```{r}
+#install.packages("igraphdata")
+library(tidyverse)
+library(tidygraph)
+library(ggraph)
+library(igraphdata)
+data(USairports)
+componentes <- igraph::decompose(USairports)
+componente_grande <- componentes[[1]]
+airports <- componente_grande %>% as_tbl_graph() %>%
+  activate(edges) %>% 
+  mutate(weights = 1) %>% 
+  activate(nodes) %>% 
+  mutate(importancia = centrality_betweenness())
+```
+
+
+```{r}
+nodos_imp <- airports %>% activate(nodes) %>% as_tibble() %>%
+    arrange(desc(importancia))
+nodos_imp
+qplot(pull(nodos_imp, importancia))
+```
+
+```{r, fig.width = 12, fig.height = 12}
+ggraph(airports, layout = 'nicely') +
+  geom_edge_link(alpha=0.2) +
+  geom_node_point(aes(size = importancia, colour = importancia)) +
+  geom_node_text(aes(label = name), nudge_y = 0.2, size=1) +
+  theme_graph(base_family = 'sans')
+```
+
