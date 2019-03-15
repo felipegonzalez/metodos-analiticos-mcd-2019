@@ -992,7 +992,7 @@ de factorización de matrices  (encontrar $U$ y $V$). Hay varias alternativas po
 - Descenso en gradiente estocástico.
 
 Para entender más del primer enfoque, puedes consultar por ejemplo
-las notas del curso de aprendizaje de máquina <https://felipegonzalez.github.io/aprendizaje-maquina-2017/reduccion-de-dimensionalidad.html>. No vamos a ver más de este enfoque, pues no
+las notas del curso de aprendizaje de máquina <https://github.com/felipegonzalez/aprendizaje-maquina-mcd/blob/master/14-reducir-dimensionalidad.Rmd>. No vamos a ver más de este enfoque, pues no
 es del todo apropiado: nuestras matrices tienen muchos datos faltantes, y SVD naturalmente no está diseñado para lidiar con este problema. Se pueden hacer ciertas imputaciones (por ejemplo, insertar 0's una vez que centramos por usuario), pero los siguientes dos métodos están mejor adaptados para
 nuestro problema.
 
