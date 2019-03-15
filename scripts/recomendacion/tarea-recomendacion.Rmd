@@ -1,0 +1,149 @@
+---
+title: "Recomendación para datos de movielens"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## 1. Preparación
+
+Consideramos el conjunto chico de calificaciones de películas de 
+[MovieLens](https://grouplens.org/datasets/movielens/). Son unas 100 mil
+evaluaciones de 610 usuarios sobre 9 mil películas.
+
+```{r}
+library(tidyverse)
+movies <- read_csv("../../datos/ml-latest-small/movies.csv")
+ratings <- read_csv("../../datos/ml-latest-small/ratings.csv")
+```
+
+```{r}
+nrow(ratings)
+resumen <- ratings %>% group_by(userId) %>% summarise(num_ratings = length(rating)) 
+quantile(resumen$num_ratings)
+```
+```{r}
+movies
+```
+
+
+Seleccionamos usuarios de validación
+
+```{r}
+set.seed(5512)
+# seleccionar usuarios de validación, 300 de 600
+user_id_valid <- ratings$userId %>% unique %>% sample(size = 300)
+```
+
+Y seleccionamos el 20\% de las últimas evaluaciones de estos usuarios:
+
+```{r}
+validacion <- ratings %>% filter(userId %in% user_id_valid) %>% 
+  group_by(userId) %>% 
+  mutate(rank = rank(timestamp, ties.method = "random") / length(timestamp)) %>% 
+  filter(rank >= 0.8)
+nrow(validacion)
+```  
+
+```{r}
+entrena <- ratings %>% anti_join(validacion)
+nrow(entrena)
+```
+
+**Pregunta**: ¿cuáles son las mejores películas mejores evaluadas? Reporta la
+media y el número de evaluaciones. Recuerda filtrar por películas que han sido
+poco vistas. Describe la distribución de número de evaluaciones por usuario (usa
+cuantiles o un histograma, por ejemplo). ¿Cuántas evaluaciones hizo el usuario
+con menos evaluaciones?
+
+**Pregunta**: explica el proceso de selección de la muestra de validación para
+este ejemplo (ojo: utiliza el timestamp de la calificación).
+
+## 2. Evaluación de modelo de referencia
+
+```{r}
+pelis_medias <- entrena %>% group_by(movieId) %>% 
+  summarise(media_peli = mean(rating), num_eval = length(rating))
+usuarios_medias <- entrena %>% group_by(userId) %>% summarise(media_usuario = mean(rating))
+media_gral <- mean(entrena$rating)
+```
+
+
+```{r}
+entrena_ref <- entrena %>% ungroup %>% 
+  left_join(pelis_medias) %>% 
+  left_join(usuarios_medias) %>% 
+  mutate(pred = media_peli + (media_usuario - media_gral)) %>% 
+  mutate(pred = ifelse(is.na(pred), media_gral, pred)) %>% 
+  mutate(rating_c = rating - pred)
+valida_ref <- validacion %>% ungroup %>% 
+  left_join(pelis_medias) %>% 
+  left_join(usuarios_medias) %>% 
+  mutate(pred = media_peli + (media_usuario - media_gral)) %>% 
+  mutate(pred = ifelse(is.na(pred), media_gral, pred))
+```
+
+**Pregunta**: Calcula la raíz del error cuadrático medio del modelo de referencia
+(entrenamiento y validación).
+
+```{r}
+# aquí tu código
+```
+
+## 3. Mínimos cuadrados alternados
+
+Ahora probamos mínimos cuadrados alternados con 2 factores latentes
+
+```{r}
+library(sparklyr)
+sc <- spark_connect(master = "local")
+spark_set_checkpoint_dir(sc, './checkpoint')
+```
+
+En este ejemplo, ajustamos por media de películas y usuarios antes
+de correr le modelo:
+
+
+```{r}
+entrena_tbl <- copy_to(sc, entrena_ref, overwrite = T)
+valida_tbl <- copy_to(sc, valida_ref, overwrite = T)
+```
+
+Rellena los nombres de las variables, 
+
+```{r}
+# rellena valores (usa rango 2 al principio)
+modelo <- ml_als(entrena_tbl, 
+              rating_col = 
+              user_col = 
+              item_col = 
+              rank = , reg_param = 0.1,
+              checkpoint_interval = 5,
+              max_iter = 50)
+```
+
+Calcula predicciones y coléctalas al ambiente de R:
+
+```{r}
+preds <- sdf_predict(valida_tbl, modelo) %>% collect() %>% 
+  mutate(final_pred = pred + prediction)
+preds_entrena <- sdf_predict(entrena_tbl, modelo) %>% collect() %>% 
+  mutate(final_pred = pred + prediction)
+```
+
+**Pregunta** Explica por qué el cálculo de *final_pred*. Calcula el error de entrenamiento y validación para este modelo.
+
+```{r}
+# aquí tu código
+```
+
+** Pregunta**: Según los resultados que obtuviste en la pregunta anterior, intenta
+incrementar o decrementar la regularización. Reporta error de entrenamiento y validación.
+
+**Pregunta** (opcional): cambia el número de factores y afina la regularización para mejorar
+los resultados del inciso anterior.
+
+**Pregunta** (opcional): usa el conjunto de datos más grande en la liga de arriba, si quieres
+obtener mejores resultados.
