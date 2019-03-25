@@ -766,7 +766,7 @@ ocurrencias en la muestra de entrenamiento. A este proceso se
 le llama **backoff**.
 
 Un método popular con mejor desempeño que Laplace es
-el **Kneser-Kney**. Consideremos el caso de bigramas.
+el **Kneser-Ney**. Consideremos el caso de bigramas.
 
 En primer lugar, este método utiliza interpolación con
 un modelo para bigramas:
