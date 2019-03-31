@@ -14,7 +14,7 @@ el [capítulo 3](https://web.stanford.edu/~jurafsky/slp3/3.pdf)
 
 
 
-## Ejemplo: Modelo de canal ruidoso.
+## Ejemplo: Modelo de canal ruidoso
 
 Para entender más este problema consideramos el modelo del canal ruidoso:
 
@@ -37,7 +37,7 @@ $$P(W|X).$$
 
 Propondríamos entonces como origen el texto $W^*$ que maximiza esta probabilidad condicional:
 
-$$W^* = argmax_W P(W|X).$$
+$$W^* = argmax_W P(W|X),$$
 
 que en principio es un máximo sobre todas las posibles frases del lenguaje.
 
@@ -52,7 +52,7 @@ $$ W^* = argmax_W P(X|W)P(W).$$
 
 Esta forma tiene dos partes importantes:
 
-1. **Verosimilitud**: la probabilidad $P(X|W)$ de observar el mensaje transfromado $X$ dado que el mensaje es $W$. Este el el  **modelo del canal** (o **modelo de errores**), que nos dice cómo ocurren errores o transformaciones $X$ cuando se pretende comunicar el mensaje $W$.
+1. **Verosimilitud**: la probabilidad $P(X|W)$ de observar el mensaje transfromado $X$ dado que el mensaje es $W$. Este es el  **modelo del canal** (o **modelo de errores**), que nos dice cómo ocurren errores o transformaciones $X$ cuando se pretende comunicar el mensaje $W$.
 
 2. **Inicial** o **previa**: La probabilidad $P(W)$ de observar el mensaje $W$ en el contexto actual. Esto depende más del lenguaje que del canal, y le llamamos el **modelo del lenguaje**.
 
