@@ -815,8 +815,8 @@ En segundo lugar, en vez de usar las probabilidades crudas
 de unigramas $P(w)$, usamos las probabilidades de continuación
 de unigramas $P_{cont}(w)$:
 
-$$P_{cont}(w) = \frac{\sum_{z\in V} N(zw)}
-{ \sum_{z, b\in V} N(zb)}.$$
+$$P_{cont}(w) = \frac{\sum_{z\in V} I(N(zw) >0) }
+{ \sum_{z, b\in V} I(N(zb > 0))}.$$
 
 Que simplemente es la probabilidad de que $w$ sea una continuación después de alguna palabra (en el denominador están todas las posibles continuaciones sobre todas las palabras). Verifica que $\sum_{w\in V} P_{cont} (w) = 1$, de forma que es una distribución de probabilidad
 sobre los unigramas.
