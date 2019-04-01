@@ -315,25 +315,15 @@ normalizar <- function(texto, vocab = NULL){
   texto <- tolower(texto)
   texto <- gsub("\\s+", " ", texto)
   texto <- gsub("\\.[^0-9]", " _ss_ _s_ ", texto)
-  texto <- gsub("[«»]", "", texto) 
+  texto <- gsub("[«»¡!¿?-]", "", texto) 
   texto <- gsub(";", " _punto_coma_ ", texto) 
   texto <- gsub("\\:", " _dos_puntos_ ", texto) 
-  texto <- gsub("\\,[^0-9]", " _coma_ ", texto) 
+  texto <- gsub("\\,[^0-9]", " _coma_ ", texto)
   texto <- paste("_s_ _s_", texto)
+  texto <- gsub("\\s+", " ", texto)
   texto
 }
-restringir_vocab <- function(texto, vocab = vocab){
-  texto_v <- strsplit(texto, " ")
-  texto_v <- lapply(texto_v, function(x){
-    en_vocab <- x %in% vocab
-    x[!en_vocab] <- "_unk_"
-    x
-  })
-  texto <- sapply(texto_v, function(x){
-      paste(x, collapse = " ")
-  })
-  texto
-}
+
 corpus_mini <- c("Este es un ejemplo: el perro corre, el gato escapa. Este es un número 3.1416, otro número es 1,23.",
            "Este   es otro ejemplo.  " )
 normalizar(corpus_mini)
@@ -383,14 +373,14 @@ muestra_ind <- sample(1:nrow(periodico_df), 1e5)
 periodico_m <- periodico_df[muestra_ind, ]
 ```
 
-Y calculamos las frecuencias de todos los unigramas:
+Y calculamos las frecuencias de todos unigramas, bigramas y trigramas:
 
 ```{r unigramas, cache = TRUE}
-conteo_ngramas <- function(corpus, n = 1, vocab = NULL){
+conteo_ngramas <- function(corpus, n = 1, vocab_df = NULL){
   token_nom <- paste0('w_n_', rev(seq(1:n)) - 1)
   token_cond <- syms(token_nom[-length(token_nom)])
   ngramas_df <- corpus %>% 
-                unnest_tokens(ngrama, txt, token = "ngrams", n = n)
+                unnest_tokens(ngrama, txt, token = "ngrams", n = n) 
   frec_ngramas <- ngramas_df %>% group_by(ngrama) %>%
                   summarise(num = length(ngrama)) %>%
                   separate(ngrama, token_nom, sep=" ") %>%
@@ -422,7 +412,7 @@ la palabra *la* o la palabra *el*?
 mod_tri %>% arrange(desc(num)) %>% head(100) %>% knitr::kable()
 ```
 
-### Cálculo de probabilidad de textos y suavizamiento simple
+### Cálculo de probabilidad de textos: el problema de los ceros
 
 Podemos ahora evaluar la probabilidad de ocurrencia de 
 textos utilizando las frecuencias que calculamos arriba:
@@ -432,9 +422,13 @@ n_gramas <- list(unigramas = mod_uni,
                  bigramas  = mod_bi,
                  trigramas = mod_tri)
 
-log_prob <- function(textos, n_gramas, n = 2, laplace = FALSE, delta = 0.001){
+log_prob <- function(textos, n_gramas, n = 2, laplace = FALSE, delta = 0.001, vocab_env = NULL){
   df <- data_frame(id = 1:length(textos), txt = textos) %>%
          mutate(txt = normalizar(txt))
+  if(!is.null(vocab_env)){
+    df <- df %>% mutate(txt_u = map_chr(txt, ~restringir_vocab(.x, vocab = vocab_env))) %>% 
+    select(id, txt_u) %>% rename(txt = txt_u)
+  }
   token_nom <- paste0('w_n_', rev(seq(1:n)) - 1)
   df_tokens <- df %>% group_by(id) %>%
                 unnest_tokens(ngrama, txt, 
@@ -457,7 +451,7 @@ log_prob <- function(textos, n_gramas, n = 2, laplace = FALSE, delta = 0.001){
 textos <- c("Otro día muy soleado.",
             "Es este ejemplo un.",
            "Este es un ejemplo.",
-           "Esta frase es normal.")
+           "Esta frase es xxyz.")
 log_prob(textos, n_gramas, n = 1)
 log_prob(textos, n_gramas, n = 2)
 log_prob(textos, n_gramas, n = 3)
@@ -468,6 +462,8 @@ log_prob(textos, n_gramas, n = 3)
 
 - El modelo de unigramas claramente no captura estructura en el orden de palabras. Las primeras dos frases tienen probabilidad de ocurrir en 
 el lenguaje muy distinta, pero este modelo les da la misma probabilidad.
+- La cuarta frase tiene probabilidad 0 en todos los modelos porque la palabra *xxyz* no existe en el vocabulario 
+de entrenamiento.
 - El modelo de bigramas da una probabilidad relativamente baja a la segunda frase, pero da 0 de probabilidad a la primera frase (existen bigramas no observados):
 ```{r}
 n <- 2
@@ -505,8 +501,63 @@ datos de entrenamiento.
 - No observamos bigramas, trigramas, etc. específicos (por ejemplo,
 observamos *día*, y *aburrido* pero no observamos *día aburrido*).
 
-Para el primero problema, podemos entrenar nuestro modelo
-con una palabra adicional $<unk>$, que denotan palabras desconocidas.
+#### Palabras desconocidas {-}
+
+Para el primer problema, podemos entrenar nuestro modelo
+con una palabra adicional $<unk>$, que denota palabras desconocidas. Una
+estrategia es tomar las palabras con frecuencia baja y sustituirlas por
+<unk>, por ejemplo:
+
+```{r}
+vocabulario_txt <- n_gramas[[1]] %>% filter(num > 1) %>% 
+    pull(w_n_0)
+vocab_env <- new.env()
+vocab_env[["_unk_"]] <- 1
+for(a in vocabulario_txt){
+    vocab_env[[a]] <- 1
+}
+nrow(n_gramas[[1]])
+sum(n_gramas[[1]]$num)
+length(vocab_env)
+```
+
+```{r}
+restringir_vocab <- function(texto, vocab_env){
+  texto_v <- strsplit(texto, " ")[[1]]
+  texto_v <- lapply(texto_v, function(x){
+    en_vocab <- vocab_env[[x]]
+    x[is.null(en_vocab)] <- "_unk_"
+    x
+  })
+  texto <- paste(texto_v, collapse = " ")
+  texto
+}
+periodico_m_unk <- periodico_m %>% 
+    mutate(txt_u = map_chr(txt, ~restringir_vocab(.x, vocab = vocab_env))) %>% 
+    select(id, txt_u) %>% rename(txt = txt_u)
+```
+
+
+Y ahora podemos reentrenar nuestros modelos:
+
+```{r}
+mod_uni <- conteo_ngramas(periodico_m_unk, n = 1)
+mod_bi  <- conteo_ngramas(periodico_m_unk, n = 2)
+mod_tri <- conteo_ngramas(periodico_m_unk, n = 3)
+n_gramas_u <- list(mod_uni, mod_bi, mod_tri)
+```
+
+```{r}
+textos <- c("Es un día soleado.",
+            "Es este ejemplo un.",
+           "Este es un ejemplo.",
+           "Esta frase es xxyz.")
+log_prob(textos, n_gramas_u, n = 1, vocab_env = vocab_env)
+log_prob(textos, n_gramas_u, n = 2, vocab_env = vocab_env)
+log_prob(textos, n_gramas_u, n = 3, vocab_env = vocab_env)
+```
+
+#### Contexto no observado {-}
 
 Para el segundo problema, existen **técnicas de suavizamiento** (que veremos más adelante). El método más simple es el **suavizamiento de Laplace**,
 en el que simplemente agregamos una cantidad $\delta$ a los conteos de unigramas, bigramas, etc.
@@ -528,36 +579,18 @@ suavizamiento, pero existen otros mejores que veremos más adelante
 escoger hiperparámetros como $\delta$.
 
 ```{r}
-textos <- c("Otro día muy soleado.",
+textos <- c("Es un día soleado.",
             "Es este ejemplo un.",
            "Este es un ejemplo.",
            "Esta frase es normal.")
-log_prob(textos, n_gramas, n = 1, laplace = TRUE)
-log_prob(textos, n_gramas, n = 2, laplace = TRUE)
-log_prob(textos, n_gramas, n = 3, laplace = TRUE)
+log_prob(textos, n_gramas_u, n = 1, laplace = TRUE, delta = 0.01)
+log_prob(textos, n_gramas_u, n = 2, laplace = TRUE, delta = 0.01)
+log_prob(textos, n_gramas_u, n = 3, laplace = TRUE, delta = 0.01)
 ```
 
 Nótese que este suavizamiento cambia considerablemente las probabilides estimadas,
 incluyendo algunas de ellas con conteos altos (esta técnica dispersa demasiada
 probabilidad sobre conteos bajos).
-
----
-
-### Palabras no vistas {-}
-
-Otro problema adicional ocurre cuando encontramos palabras
-que no habíamos observado con anterioridad. En este caso, 
-la técnica de redistribuir probabilidad no funciona (pues
-no sabemos cuántas palabras no vistas vamos a encontrar).
-
-En lugar de eso, la idea es quitar algunas palabras
-poco frecuentes en nuestro conjunto de datos y sustituir
-por el token $<unk>$, que es un indicador de "palabra desconocida".
-Si encontramos palabras desconocidas, utilizamos 
-las probabilidades correspondientes de $<unk>$ para calcular
-la probabilidad (ver más en [@jurafsky]).
-
-
 
 
 ## Evaluación de modelos
@@ -585,7 +618,7 @@ texto <- "_s_"
 fin <- FALSE
 set.seed(12315)
 while(!fin){
-  siguiente <- calc_siguiente_uni(texto, n_gramas)
+  siguiente <- calc_siguiente_uni(texto, n_gramas_u)
   texto <- c(texto, siguiente)
   if(siguiente == "_ss_"){
     fin <- TRUE
@@ -608,9 +641,9 @@ calc_siguiente_bi <- function(texto, n_gramas){
   as.character(siguiente_df[palabra_no, "w_n_0"])
 }
 texto <- "_s_"
-set.seed(43)
+set.seed(413)
 for(i in 1:40){
-  siguiente <- calc_siguiente_bi(texto, n_gramas)
+  siguiente <- calc_siguiente_bi(texto, n_gramas_u)
   texto <- c(texto, siguiente)
   if(siguiente == "_ss_"){
     texto <- c(texto, "_s_")
@@ -633,9 +666,9 @@ calc_siguiente_tri <- function(texto, n_gramas){
   as.character(siguiente_df[palabra_no, "w_n_0"])
 }
 texto <- c("_s_", "_s_")
-set.seed(411)
+set.seed(415)
 for(i in 1:50){
-  siguiente <- calc_siguiente_tri(texto, n_gramas)
+  siguiente <- calc_siguiente_tri(texto, n_gramas_u)
   texto <- c(texto, siguiente)
   if(siguiente == "_ss_"){
     texto <- c(texto, "_s_")
@@ -709,9 +742,9 @@ los modelos más complejos:
 periodico_entrena <- periodico[muestra_ind]
 textos <- periodico_entrena[1:1000]
 texto_entrena <- paste(textos, collapse = " ")
-exp(-log_prob(texto_entrena, n_gramas, n = 1, laplace = T))
-exp(-log_prob(texto_entrena, n_gramas, n = 2, laplace = T))
-exp(-log_prob(texto_entrena, n_gramas, n = 3, laplace = T))
+exp(-log_prob(texto_entrena, n_gramas_u, n = 1, laplace = T))
+exp(-log_prob(texto_entrena, n_gramas_u, n = 2, laplace = T))
+exp(-log_prob(texto_entrena, n_gramas_u, n = 3, laplace = T))
 ```
 
 Y para la muestra de prueba:
@@ -722,16 +755,14 @@ Y para la muestra de prueba:
 periodico_prueba <- periodico[-muestra_ind]
 textos <- periodico_prueba[1:1000]
 texto_prueba <- paste(textos, collapse = " ")
-exp(-log_prob(texto_prueba, n_gramas, n = 1, laplace = T))
-exp(-log_prob(texto_prueba, n_gramas, n = 2, laplace = T))
-exp(-log_prob(texto_prueba, n_gramas, n = 3, laplace = T))
+exp(-log_prob(texto_prueba, n_gramas_u, n = 1, laplace = T))
+exp(-log_prob(texto_prueba, n_gramas_u, n = 2, laplace = T))
+exp(-log_prob(texto_prueba, n_gramas_u, n = 3, laplace = T))
 ```
 
 Y vemos para este ejemplo que el mejor desempeño está dado por el modelo de bigramas, aunque no hemos hecho ningún ajuste ad-hoc del parámetro $\delta$. Como explicamos arriba,
 es preferible usar otros algoritmos de suavizamiento.
 
-**Observación**: En este caso, suavizamos las probabilidades de unigramas también, pero esto no es totalmente correcto. Para hacer la evaluación correctamente, es necesario usar los tokens $<unk>$ como
-explicamos arriba.
 
 
 ####  Ejercicio {-}
