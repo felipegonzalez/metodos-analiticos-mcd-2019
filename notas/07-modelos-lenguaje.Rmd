@@ -286,8 +286,8 @@ No necesitaremos calcular las probabilidades
 $P(w)$ (una sola palabra), pues podemos como símbolo inicial
 de cada frase un símbolo fijo como $\langle s \rangle$, y al final un símbolo
 como $\langle /s \rangle$. Así, por ejemplo, $P(el|\langle s\rangle)$ es la probabilidad
-de que la frase empiece on la palabra *el*. Entonces, para calcular
-por ejemplo P(El perro corre), haríamos, bajo el modelo de bigramas
+de que la frase empiece сon la palabra *el*. Entonces, para calcular
+por ejemplo $P(El\, perro\, corre)$, haríamos, bajo el modelo de bigramas
 
 $$P(\langle s \rangle el\,perro\, corre \langle /s \rangle) = 
 P(\langle s \rangle)P(el|\langle s \rangle)P(perro|el)P(corre|perro)P(corre|\langle /s \rangle)$$
