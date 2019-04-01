@@ -484,7 +484,7 @@ df_tokens
 ```
 El problema es que no observamos "muy soleado".
 
-- El modelo de trigramas, también da probabilidad 0 a la última frase, lo cual parece también parece incorrecto
+- El modelo de trigramas, también da probabilidad 0 a la última frase, lo cual también parece incorrecto
 
 ---
 
