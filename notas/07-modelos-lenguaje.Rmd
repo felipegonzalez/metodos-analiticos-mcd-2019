@@ -493,7 +493,7 @@ un bigrama (o trigrama, etc.) dado, la probabilidad asignada es 0.
 
 Aunque para algunas frases esta asignación es correcta (una texto que no puede
 ocurrir en el lenguaje), muchas veces esto se debe a que los datos son ralos: la mayor
-parte de la frases posibles no son observadas en nuestro corpus, y es erróneo
+parte de las frases posibles no son observadas en nuestro corpus, y es erróneo
 asignarles probabilidad 0. Más en general, cuando los conteos de bigramas son
 chicos, sabemos que nuestra estimación por máxima verosimilitud tendrá varianza 
 alta.
