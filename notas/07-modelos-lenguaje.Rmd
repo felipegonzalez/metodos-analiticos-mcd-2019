@@ -319,7 +319,7 @@ normalizar <- function(texto, vocab = NULL){
   texto <- gsub(";", " _punto_coma_ ", texto) 
   texto <- gsub("\\:", " _dos_puntos_ ", texto) 
   texto <- gsub("\\,[^0-9]", " _coma_ ", texto)
-  texto <- paste("_s_ _s_", texto)
+  #texto <- paste("_s_", texto)
   texto <- gsub("\\s+", " ", texto)
   texto
 }
@@ -379,7 +379,9 @@ Y calculamos las frecuencias de todos unigramas, bigramas y trigramas:
 conteo_ngramas <- function(corpus, n = 1, vocab_df = NULL){
   token_nom <- paste0('w_n_', rev(seq(1:n)) - 1)
   token_cond <- syms(token_nom[-length(token_nom)])
-  ngramas_df <- corpus %>% 
+  inicio <- paste(rep("_s_ ", n - 1), collapse = "")
+  ngramas_df <- corpus %>%
+                mutate(txt = paste(inicio, txt)) %>% 
                 unnest_tokens(ngrama, txt, token = "ngrams", n = n) 
   frec_ngramas <- ngramas_df %>% group_by(ngrama) %>%
                   summarise(num = length(ngrama)) %>%
@@ -423,8 +425,10 @@ n_gramas <- list(unigramas = mod_uni,
                  trigramas = mod_tri)
 
 log_prob <- function(textos, n_gramas, n = 2, laplace = FALSE, delta = 0.001, vocab_env = NULL){
+  inicio <- paste(rep("_s_ ", n - 1), collapse = "")    
   df <- data_frame(id = 1:length(textos), txt = textos) %>%
-         mutate(txt = normalizar(txt))
+         mutate(txt = normalizar(txt)) %>% 
+         mutate(txt = paste(inicio, txt))
   if(!is.null(vocab_env)){
     df <- df %>% mutate(txt_u = map_chr(txt, ~restringir_vocab(.x, vocab = vocab_env))) %>% 
     select(id, txt_u) %>% rename(txt = txt_u)
@@ -527,17 +531,19 @@ length(vocab_env)
 restringir_vocab <- function(texto, vocab_env){
   texto_v <- strsplit(texto, " ")[[1]]
   texto_v <- lapply(texto_v, function(x){
-    en_vocab <- vocab_env[[x]]
-    if(is.null(en_vocab)){
-        x <- "_unk_"
+    if(x != ""){
+        en_vocab <- vocab_env[[x]]
+        if(is.null(en_vocab)){
+            x <- "_unk_"
+        }
+        x
     }
-    x
   })
   texto <- paste(texto_v, collapse = " ")
   texto
 }
 periodico_m_unk <- periodico_m %>% 
-    mutate(txt_u = map_chr(txt, ~restringir_vocab(.x, vocab = vocab_env))) %>% 
+    mutate(txt_u = map_chr(txt, ~restringir_vocab(.x, vocab_env = vocab_env))) %>% 
     select(id, txt_u) %>% rename(txt = txt_u)
 ```
 
@@ -620,7 +626,7 @@ calc_siguiente_uni <- function(texto, n_gramas){
 }
 texto <- "_s_"
 fin <- FALSE
-set.seed(12315)
+set.seed(1215)
 while(!fin){
   siguiente <- calc_siguiente_uni(texto, n_gramas_u)
   texto <- c(texto, siguiente)
