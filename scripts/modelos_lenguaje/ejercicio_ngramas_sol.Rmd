@@ -1,0 +1,79 @@
+---
+title: "Modelos de lenguaje"
+output: html_document
+---
+
+1. (De nuestra referencia de Jurafsky). Considera el siguiente corpus:
+<s> I am Sam </s>
+<s> Sam I am </s>
+<s> I am Sam </s>
+<s> I do not like green eggs and Sam </s>
+
+Con este corpus, 
+
+- Usa un modelo de unigramas para calcular $P(Sam)$. Recuerda contar los <s> y </s> como tokens.
+
+- Usa un modelo de bigramas para calcular $P(Sam | am)$ y
+$P(I | <s>)$. 
+
+**Solución**: No hacemos ninguna modificación (ya están los comienzos
+y finales de oración)
+
+```{r}
+library(tidytext)
+textos <- c("_s_ I am Sam _ss_", "_s_ Sam I am _ss_",
+           "_s_ I am Sam _ss_","_s_ I do not like green eggs and Sam _ss_" )
+textos_tbl <- tibble(id = 1:4, txt = textos)
+bigramas <- textos_tbl %>% unnest_tokens(bigrama, txt, token = "ngrams", n = 2, to_lower=FALSE)
+unigramas <- textos_tbl %>% unnest_tokens(unigrama, txt, token = "ngrams", n = 1, to_lower = FALSE)
+unigramas
+```
+
+```{r}
+conteo_bi <- bigramas %>% group_by(bigrama) %>% tally()
+conteo_uni <- unigramas %>% group_by(unigrama) %>% tally() 
+# tamaño de vocabulario
+V <- conteo_uni %>% nrow()
+```
+
+De aquí vemos que $P(Sam)$ es 4/11:
+```{r}
+conteo_uni %>% filter(unigrama=="Sam") %>% pull(n)
+V
+```
+
+
+Para $P(Sam|am)$ hacemos:
+
+```{r}
+n_sam_am <- conteo_bi %>% filter(bigrama == "am Sam") %>% pull(n)
+n_sam_am
+n_sam <- conteo_uni %>% filter(unigrama=="Sam") %>% pull(n)
+n_sam_am / n_sam
+```
+
+
+2. Usando los datos de clase (notas de periódico), 
+calcula las log probabilidades de las siguientes frases bajo los modelos
+de unigramas, bigramas y trigramas:
+
+- El presidente dijo que sí.
+- El dijo presidente que sí.
+- El presidente dijo algo extraño.
+
+Explica para qué modelos obtienes NA para la segunda frase. ¿Por qué crees que pasa eso?  Para la tercera frase, ¿qué modelos devuelven NA? ¿Por qué?
+
+*Nota*: corre el código de las notas hasta la línea 600
+
+```{r}
+textos <- c("El presidente dijo que sí.", "El dijo presidente que sí.",
+            "El presidente dijo algo extraño.")
+# nota: toda la normalización se hace dentro de log_prob, incluyendo
+# sustitución de palabras nuevas.
+log_prob(textos, n_gramas_u, n = 1, vocab_env = vocab_env)
+log_prob(textos, n_gramas_u, n = 2, vocab_env = vocab_env)
+log_prob(textos, n_gramas_u, n = 3, vocab_env = vocab_env)
+```
+
+
+
