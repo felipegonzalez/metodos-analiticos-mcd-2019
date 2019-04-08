@@ -428,7 +428,7 @@ log_prob <- function(textos, n_gramas, n = 2, laplace = FALSE, delta = 0.001, vo
   inicio <- paste(rep("_s_ ", n - 1), collapse = "")    
   df <- data_frame(id = 1:length(textos), txt = textos) %>%
          mutate(txt = normalizar(txt)) %>% 
-         mutate(txt = paste(inicio, txt))
+         mutate(txt = paste(inicio, txt, sep =""))
   if(!is.null(vocab_env)){
     df <- df %>% mutate(txt_u = map_chr(txt, ~restringir_vocab(.x, vocab = vocab_env))) %>% 
     select(id, txt_u) %>% rename(txt = txt_u)
