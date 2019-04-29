@@ -8,7 +8,7 @@ El desempeño del sistema de recuperación puede ser medido de distintas formas.
 - Precisión: fracción de documentos recuperados que son relevantes a la búsqueda
 - Recall o sensibilidad: fracción de los documentos relevantes que son recuperados.
 
-Evitamos usar medidas como \% de correctos, pues en cada búsqueda típicamente la fracción de documentos relevantes es pequeña, y el número de documentos recuperados también es relativamente chico. Esto quiere decir, por ejemplo, que un sistema que recupera documentos al azar típicamente tiene un \% alto de correctos, pues la mayor parte de los documentos no relevantes no son recuperados.
+Evitamos usar medidas como $\%$ de correctos, pues en cada búsqueda típicamente la fracción de documentos relevantes es pequeña, y el número de documentos recuperados también es relativamente chico. Esto quiere decir, por ejemplo, que un sistema que recupera documentos al azar típicamente tiene un $\%$ alto de correctos, pues la mayor parte de los documentos no relevantes no son recuperados.
 
 
 ## Recuperación booleana
