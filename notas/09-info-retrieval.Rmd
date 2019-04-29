@@ -389,7 +389,7 @@ forma con logaritmo es más común
 Bajo este esquema de podneración por término y frecuencia inversa en documentos,
 la similitud entre un documento $d$ dado y un query $q$ está dada por
 
-$$\sim(q, d) = \frac{ \sum_{w\in q,d} tf_{w,q}tf_{w,d} (idf_w)^2 }{\sqrt{\sum_{i\ in q}(tf_{i,q} idf_i)^2 }\sqrt{\sum_{i \in d} (tf_{i,d} idf_i)^2 }}$$
+$$\sim(q, d) = \frac{ \sum_{w\in q,d} tf_{w,q}tf_{w,d} (idf_w)^2 }{\sqrt{\sum_{i \in q}(tf_{i,q} idf_i)^2 }\sqrt{\sum_{i \in d} (tf_{i,d} idf_i)^2 }}$$
 
 
 #### Ejercicio {-}
