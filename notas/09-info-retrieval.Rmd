@@ -207,8 +207,8 @@ de veces que aparece el término (palabra) $i$ en el documento $d$. Podemos defi
 \begin{equation}
 w_{i,d}=\left\{
 \begin{array}{lr}
-1+ \log (tf_{i,d}) & tf_{i,d}>0\\
-0 & tf_{id}=0
+1+ \log (tf_{i,d}), & tf_{i,d}>0\\
+0, & tf_{id}=0.
 \end{array}
 \right.
 \end{equation}
