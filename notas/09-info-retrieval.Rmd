@@ -536,3 +536,180 @@ similitudes <- calc_sim(vec, td_noticias_tfidf)
 recuperados <- periodico_original[order(similitudes[1,], decreasing = TRUE)[1:100]] 
 head(recuperados, 20)
 ```
+
+## Indexado semántico latente
+
+El modelo de espacio vectorial para recuperación de documentos
+(o en otras tareas como creación de variables para construir modelos de clasificación, por ejemplo), tiene la desventaja
+de no explotar la estructura de la colección de documentos más
+allá de frecuencias de términos particulares. En particular, por ejemplo, no es posible directamente cuáles términos son 
+sinónimos o cercanos a sinónimos, ni entender que una palabra
+puede tener más de un significado. Este tipo de aspectos pueden
+resolverese en parte considerando la ocurrencia conjunta de términos, por ejemplo:
+
+- Si consideramos que "carro" y "coche" ocurren en varios
+documentos que tienen frecuencias similares de otros términos
+(gasolina, llantas, viaje, etc.), quizá podríamos "agruparlos", de manera que búsquedas de uno o otro término resulte en devolver 
+colecciones de documentos similares.
+
+Una idea para construir estas "agrupaciones" es utilizar
+la descomposición en valores singulares (DVS) de la matriz términos - documentos para aproximar esta matriz mediante otra de rango bajo.
+
+Consideremos entonces una matriz $C$ de términos-documentos de
+tamaño $M\times N$. Utilizando la DVS, podemos aproximar $C$ mediante una matriz $C_k$ dada por:
+
+$$C \approx C_k = U_k\Sigma_k V_k^t,$$
+
+donde $U_k$ es una matriz ortogonal de tamaño $M\times k$,
+$V_k$ es una matriz ortogonal de tamaño $M\times k$, y 
+$\Sigma_k$ es una matriz diagonal con los $k$ valores singulares
+más grandes en la diagonal (ver por ejemplo 
+[esta explicación](https://felipegonzalez.github.io/aprendizaje-maquina-mcd/reduccion-de-dimensionalidad.html#descomposicion-en-valores-singulares-svd-o-dvs).
+
+Esta reducción de dimensionalidad la podemos ver como 
+una tarea de compresión, donde términos que tienen co-ocurrencias
+similares de otros términos tienden a agruparse en una sola dimensión.
+
+#### Ejemplo {-}
+
+Consideremos los siguientes textos:
+
+```{r, tidy=FALSE}
+frases <- c('viajamos en carro y se ponchó una llanta',
+            'los coches tienen llantas',
+            'un coche sin llantas',
+            'un carro con llantas ponchadas',
+            'hicimos un viaje en coche',
+            'viajamos en carro', 'viajamos en coche',
+            'La cocina catalana es ligera',
+            'me gusta cocinar', 
+            'una cocina muy tradicional',
+            'me gusta la cocina tradicional')
+frases_norm <- normalizar_stem(frases)
+```
+
+Construimos una matriz binaria que indica qué términos
+aparecen en qué documentos
+
+```{r}
+vs <- VectorSource(frases_norm)
+corpus <- VCorpus(vs)
+td_sparse <- TermDocumentMatrix(corpus, 
+      control = list(weighting = weightBin,
+           wordLengths = c(3, Inf))) 
+td_mat <- as.matrix(td_sparse)
+td_mat
+```
+
+Consideremos la descomposición en valores singulares:
+
+```{r}
+svd_ejemplo <- svd(td_mat)
+```
+
+Las columnas de la matriz $U$ pueden ser considerados
+como "documentos latentes". Consideramos los primeros dos:
+
+```{r}
+U_2 <- - svd_ejemplo$u[,1:2]
+rownames(U_2) <- rownames(td_mat)
+round(U_2, 1)[order(U_2[,1]),]
+```
+
+Y notamos que la primera dimensión captura aquellos
+documentos con ocurrencia alta de términos relacionados con 
+coches: este es un término nuevo
+que podemos llamar "automotriz", por ejemplo. Estos términos
+están agrupados en esta dimensión pues ocurren juntos
+en varios documentos, lo que implica que podemos "comprimir"
+estas frecuencias en una sola dimensión.
+
+Los documentos con contenido alto del nuevo término
+"automotriz" son los que tienes valores altos en este
+primer término, por ejemplo:
+
+```{r}
+V_2 <- -svd_ejemplo$v[,1:2] # podemos cambiar signo de U y V
+tibble(frase = frases, v_1 = round(V_2[, 1], 1), v_2 = round(V_2[, 2], 1))
+```
+
+---
+
+Nótese que podemos pensar que esta es nuestra nueva matriz documentos-términos ($V_k$), con "términos" latentes o dimensiones latentes, y podemos **calcular similitudes de documentos usando la similitud
+coseno**. Para encontrar las coordenadas latentes de los documentos (en coordenadas $V$),
+notamos que como $C_k = U\Sigma_kV_kt$, entonces
+
+$$V_k^t = \Sigma_k^{-1}U_k^tC_k$$
+De modo que para mapear un nuevo documento o query $q$ en el espacio de dimensiones semánticas hacemos
+$$q_s = \Sigma_k^{-1} U_k^t q,$$
+donde $q$ es la respresentación vectorial del query. Podemos ahora comparar $q_s$ directamente
+con los vectores de la matriz $V_k$
+
+#### Ejemplo {-}
+
+Supongamos que tenemos el query "un viaje en coche". El vector asociado es:
+
+```{r}
+vocab_ejemplo <- rownames(td_mat)
+q <- procesar_query("un viaje en coche", vocab_ejemplo, normalizar_stem)
+q <- as.matrix(q)
+q
+```
+
+Ahora mapeamos a las dimensiones latentes:
+
+```{r}
+S_2 <- svd_ejemplo$d[1:2]
+q_s <- diag(1 / S_2) %*% t(U_2) %*% q
+q_s
+```
+
+Y ahora podemos comparar con los reglones de $V$, que dan la representación de
+los documentos originales. 
+
+```{r}
+normas <- apply(V_2, 1, function(x){ sqrt(sum(x^2)) })
+V_2_norm <- V_2 / normas
+q_s_norm <- q_s / sqrt(sum(q_s^2))
+ tibble(frases = frases, sim = V_2_norm %*% q_s_norm %>% as.numeric) %>% arrange(desc(sim))
+```
+
+Nótese como recuperamos también frases similares con el término "carro", que no
+está en el query original
+
+
+### Ejemplo
+
+Ahora repetimos con el corpus de noticias. Consideremos solo unas cuantas dimensiones
+latentes importantes (normalmente utilizaríamos orden de cientos para similitud):
+
+```{r}
+library(irlba)
+td_sparse <- sparseMatrix(i = td_noticias_tfidf$i, j = td_noticias_tfidf$j, x = td_noticias_tfidf$v)
+noticias_svd <- irlba(td_sparse, nv = 5, nu = 5)
+```
+
+Por ejemplo, los términos:
+
+```{r}
+terminos <- tibble(termino = Terms(td_noticias_tfidf),
+                   dim_1 = noticias_svd$u[,3], dim_2 = noticias_svd$u[,4])
+head(terminos %>% arrange(dim_2),40)
+```
+
+
+```{r}
+head(terminos %>% arrange(dim_1),40)
+```
+
+
+
+- El método de indexado semántico latente es intensivo en cómputo, y es difícil escalar
+a colecciones muy grandes. 
+
+- Sin embargo, en algunos casos puede dar ventajas en recuperación
+de documentos gracias a la reducción de dimensionalidad (reconocimiento de sinónimos, por ejemplo).
+
+- También es posible usar las dimensiones latentes para construir modelo de clasificación de textos o
+clustering, por ejemplo.
+
