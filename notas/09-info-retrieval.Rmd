@@ -230,7 +230,7 @@ similares documentos en los que un mismo término aparece varias veces.
 Con esto podemos dar nuestra primera medida de similitud entre documentos
 (o entre un documento $d$ y una consulta $q$):
 
-$$sim(q, d) = \frac{< w_{q}, w_d>}{||w_d||||w_q||},$$
+$$sim(q, d) = \frac{< w_{q}, w_d>}{||w_d||\cdot||w_q||},$$
 que es igual a
 $$sim(q, d) = \frac{\sum_i w_{i,q} w_{i,d}} {\sqrt{\sum_i w_{i,q}^2}\sqrt{\sum_i w_{i,d}^2}},$$
 que es el producto punto de los vectores $w_q$ y $w_d$ después de normalizarlos.
@@ -389,7 +389,7 @@ forma con logaritmo es más común
 Bajo este esquema de podneración por término y frecuencia inversa en documentos,
 la similitud entre un documento $d$ dado y un query $q$ está dada por
 
-$$\sim(q, d) = \frac{ \sum_{w\in q,d} tf_{w,q}tf_{w,d} (idf_w)^2 }{\sqrt{\sum_{i\ in q}(tf_{i,q} idf_i)^2 }\sqrt{\sum_{i \in d} (tf_{i,d} idf_i)^2 }}$$
+$$sim(q, d) = \frac{ \sum_{w\in q,d} tf_{w,q}tf_{w,d} (idf_w)^2 }{\sqrt{\sum_{i\ in q}(tf_{i,q} idf_i)^2 }\sqrt{\sum_{i \in d} (tf_{i,d} idf_i)^2 }}$$
 
 
 #### Ejercicio {-}
