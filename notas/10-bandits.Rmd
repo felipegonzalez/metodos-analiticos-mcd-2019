@@ -22,7 +22,7 @@ Esto no quiere decir que nuestro cambio fue positivo, pues quizá las
 ventas hubieran sido aún mayores si no hubiérmos hecho el cambio.
 
 Otra aproximación simplista en los negocios es comparar *year over year*, por ejemplo, comparamos esta navidad con las anteriores. Esto también da un
-resultado difícil de interpretar, pues estamos comparados dos periodos
+resultado difícil de interpretar, pues estamos comparando dos periodos
 alejados en el tiempo.
 
 ```{block2, type="resumen"}
