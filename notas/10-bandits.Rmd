@@ -1,6 +1,6 @@
 # Experimentación y algoritmos de tragamonedas (bandits)
 
-En esta sección consideramos el problema de hacer cambios
+En esta sección considela haríamos con el promedioramos el problema de hacer cambios
 en un sitio web, por ejemplo, con el fin de mejorar métricas
 como conversiones, ventas, tráfico, tasas de click-through, etc.
 
@@ -191,7 +191,7 @@ son:
 
 La estimación directa de el valor esperado \@ref(eq:difcausal) la haríamos con
 el promedio
-$$\frac{1}{n}\sum_i (Y_i(1) - Y_i(0))$$
+$$\frac{1}{n}\sum_i \left(Y_i(1) - Y_i(0)\right)$$
 y notamos inmediatamente una dificultad: no observamos esta diferencia
 para ninguno de los usuarios! Para cada usuario, observamos solamente una
 de $Y_i(1)$ o $Y_i(0)$. Los datos, por ejemplo, se verían:
@@ -233,7 +233,7 @@ de
 $$E[Y|T = 1] = E[Y(1)|T=1]$$
 Así que cuando la asignación del tratamiento está asociada a la variable
 de respuesta $Y$, esta última cantidad no es necesariamente igual
-a $E(Y(1))$. Explica en tus palabras por qué pasa esto (puedes comenzar
+a $E\left(Y(1)\right)$. Explica en tus palabras por qué pasa esto (puedes comenzar
 con el ejemplo de *paid search* que vimos arriba).
 
 Igualmente, el promedio $\frac{1}{n_0} \sum_{T_i = 0} Y_i$ estima
@@ -250,7 +250,7 @@ juntos el resultado más su contrafactual.
 
 Con un experimento, sin embargo, podemos superar este problema.
 Si **asignamos el tratamiento de manera aleatoria**, entonces
-por definición $E(Y(0)) = E(Y(0)|T=0)$ y $E(Y(1)) = E(Y(1)|T=0)$ (T
+por definición $E(Y(0)) = E\left(Y(0)|T=0\right)$ y $E\left(Y(1)\right) = E\left(Y(1)|T=0\right)$ ($T$
 es una variable aleatoria que no está correlacionada con ninguna otra variable),
 y el estimador estándar \@ref(eq:estandar) es un estimador insesgado 
 de la cantidad que nos interesa, que es \@ref(eq:difcausal).
