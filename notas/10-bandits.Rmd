@@ -986,8 +986,7 @@ que las $p_a(\theta|y_1,\ldots, y_{t})$ son distribuciones beta independientes
 con parámetros
 $$\theta\vert y_1\ldots, y_{t}\sim Beta(Y_{a,t} + 1, N_{a,t} - Y_{a,t} + 1),$$
 donde $N_{a,t}$ es el número de veces que se ha usado la palanca $a$ al tiempo $t$,
-y $Y_{a,t}$ es el número de 1's observado. Podemos simular de las betas para
-calcular los pesos $w_{a,t+1}$ de la siguiente forma:
+y $Y_{a,t}$ es el número de 1's observado. Podemos simular de las betas para calcular los pesos $w_{a,t+1}$ de la siguiente forma:
 
 
 ```{r}
@@ -1002,7 +1001,8 @@ crear_bayesiano <- function(sim_fun, num_sims = 1000, a = 1, b = 1){
                        sumas = sumas) %>% 
       mutate(sims = map2(conteos, sumas,
           function(n, y){
-            tibble(sim_no = 1:num_sims, valor = rbeta(num_sims, y + a, n - y + b))
+            tibble(sim_no = 1:num_sims, 
+                   valor = rbeta(num_sims, y + a, n - y + b))
           })) %>% 
       select(brazos, sims) %>% unnest %>% 
       group_by(sim_no) %>% 
@@ -1038,15 +1038,42 @@ Y simulamos un ejemplo:
 
 ```{r}
 set.seed(99770)
-sim_3 <- crear_maquina_bernoulli(lambda = c(0.05, 0.30, 0.15))
+lambda <-  c(0.05, 0.30, 0.15, 0.28)
+sim_3 <- crear_maquina_bernoulli(lambda = lambda)
 bayesiano <- crear_bayesiano(sim_fun = sim_3)
 df_iteraciones <- lapply(1:600, function(i){
   bayesiano()
 }) %>% bind_rows %>% as_tibble()
 tail(df_iteraciones)
-ggplot(df_iteraciones, aes(x = n, ymin = inf, ymax = sup, group = brazo,
-                           colour = factor(brazo))) +
-  geom_ribbon(alpha = 0.1)
+ggplot(df_iteraciones, aes(x = n, ymin = inf, ymax = sup)) +
+  geom_ribbon(alpha = 0.2) + facet_wrap(~brazo) +
+  geom_hline(data = tibble(brazo = 1:length(lambda), prob = lambda),
+             aes(yintercept = prob), linetype = "dotted", colour = "gray") +
+  geom_hline(aes(yintercept = max(lambda)), colour = "red", 
+             linetype = "dotted")
+```
+
+Podemos usar nuestra información antes del experimento. Por ejemplo,
+en el caso de conversiones, las proporciones son muchas veces chicas,
+por ejemplo
+
+
+```{r}
+set.seed(99771)
+lambda <-  c(0.03, 0.035, 0.01, 0.004)
+sim_3 <- crear_maquina_bernoulli(lambda = lambda)
+# iniciales beta(1, 6)
+quantile(rbeta(1500, 1, 20))
+bayesiano <- crear_bayesiano(sim_fun = sim_3, a = 1, b = 20)
+df_iteraciones_2 <- lapply(1:1500, function(i){
+  bayesiano()
+}) %>% bind_rows %>% as_tibble()
+ggplot(df_iteraciones_2, aes(x = n, ymin = inf, ymax = sup)) +
+  geom_ribbon(alpha = 0.2) + facet_wrap(~brazo) +
+  geom_hline(data = tibble(brazo = 1:length(lambda), prob = lambda),
+             aes(yintercept = prob), linetype = "dotted", colour = "gray") +
+  geom_hline(aes(yintercept = max(lambda)), colour = "red", 
+             linetype = "dotted")
 ```
 
 Observaciones:
@@ -1055,7 +1082,7 @@ Observaciones:
 es muy alta, entonces preferimos casi siempre al brazo $a$ sobre el brazo $b$.
 - Es necesario poner iniciales apropiadas para el problema. Por ejemplo,
 las conversiones (para muchas definiciones) rara vez superan 5\%, y en muchos casos
-son considerablemente menores a 1\%.
+son considerablemente menores a 1\%. 
 - Este esquema puede aplicarse con eficiencia a esquemas más
 complejos, considerando modelos más refinados para $p_a(y|\theta)$. Por ejemplo,
 puede haber parámetros compartidos entre los modelos, podemos usar regresión,
