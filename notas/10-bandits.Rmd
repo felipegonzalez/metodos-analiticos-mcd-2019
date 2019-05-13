@@ -1,6 +1,6 @@
 # Experimentación y algoritmos de tragamonedas (bandits)
 
-En esta sección considela haríamos con el promedioramos el problema de hacer cambios
+En esta sección consideramos el problema de hacer cambios
 en un sitio web, por ejemplo, con el fin de mejorar métricas
 como conversiones, ventas, tráfico, tasas de click-through, etc.
 
@@ -259,12 +259,12 @@ de la cantidad que nos interesa, que es \@ref(eq:difcausal).
 ## Costos de experimentación
 
 Ahora supongamos que para simplificar nuestra vida, y tener resultados
-sólidos, decidimos hacer un experimento A/B en nuestro sitio web. Decidimos
-entonces, cada vez que un usuario pide una página x, tiramos un volado y decidimos
-si le enseñamos la versión A y la versión B. Lo que hace este usuario en el resto
+sólidos, decidimos hacer un experimento $A/B$ en nuestro sitio web. Decidimos
+entonces, cada vez que un usuario pide una página $x$, tiramos un volado y decidimos
+si le enseñamos la versión $A$ y la versión $B$. Lo que hace este usuario en el resto
 de su sesión estará registrado en los logs del sitio (o en una base de datos si
 nuestra aplicación registra los resultados de interés). Podemos entonces, después
-de tener un número apriopiado de usuarios en cada rama A y B, comparar los
+de tener un número apriopiado de usuarios en cada rama $A$ y $B$, comparar los
 dos grupos y tomar una decisión final acerca de qué versión nos conviene.
 
 Las primeras objeciones que podemos hacer a esta decisión (y que muchos interesados
@@ -276,7 +276,7 @@ en el negocio seguramente plantearán):
 
 - El camino de la experimentación muchas veces es contrario al pensamiento de los analistas de negocios/tomadores de decisiones, que a veces prefieren hacer análisis diseñados para entender el potencial de cambio *antes* de hacer ningún cambio. Por ejemplo encuestas, pruebas en focus groups, etc. **Respuesta**: el análisis ad-hoc es una herramienta poderosa, pero también muchas veces plagada de incertidumbre no siempre explícita (por ejemplo, muy dependiente del tipo de modelos que se consideran, o de los datos que se tienen a mano). Es posible combinar las dos aproximaciones.
 
-En particular, los experimentos A/B (que pueden tener más de 2 opciones) tienen la debilidad de que
+En particular, los experimentos $A/B$ (que pueden tener más de $2$ opciones) tienen la debilidad de que
 
 - Cuando hacemos experimentación, generalmente decidimos cuánto tiempo va a durar el experimento para tener tamaños de muestra adecuados. En algunos casos, las opciones son tan malas o tan buenas en relación a otras que esto es un desperdicio de dinero (podemos descartar una opción rápidamente por ser muy mala). 
 
@@ -289,7 +289,7 @@ antes de que se completen las muestras diseñadas. Esto intuitivamente es una ma
 
 - Muchas veces, se considera que los más importante de controlar es el error tipo I (declarar
 un cambio como mejoría cuando realmente es más o menos equivalente a lo que teníamos antes) mediante
-algún nivel de significancia (5\%). En la práctica, 
+algún nivel de significancia ($5\%$). En la práctica, 
 nos preocupan más los errores de tipo II (no escoger un cambio que representa ganancias grandes), especialmente cuando el costo
 de hacer cambios es relativamente bajo, como en el caso de páginas web
 o algoritmo de machine learning usado, por ejemplo.
