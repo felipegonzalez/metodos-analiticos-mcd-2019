@@ -62,7 +62,7 @@ cuando se hizo la intervención. La línea punteada es el contrafactual estimado
 - Este análisis se basa en la construcción de **contrafactuales** con modelos dinámicos bayesianos. La idea es simple: supongamos que nuestra métrica de interés es $y$. Enconcontramos una covariable $x_1$, y construimos un modelo
 (con los datos anteriores a la intervención) para $y$ con $x_1$ como covariable. La covariable $x_1$ debe ser escogida de forma que **tengamos evidencia fuerta** de que esta variable **no será afectada por la intervención**. De este forma, el contrafactual después de la intervención se construye haciendo la predicción de $y$ basada en $x_1$, y nos da una idea de lo que hubiera pasado sin la intervención.
 
-- Por ejemplo, en algunos casos podemos escoger $x_1$ como las ventas de la región A, $y$ son la ventas de la región $B$. Nuestra intervención (por ejemplo, una promoción) la aplicamos solamente en la región $B$. Entonces el modelo basado de $y$ en $x_1$ (ventas región A, que no es intervenida) nos da el contrafactual para comparar.
+- Por ejemplo, en algunos casos podemos escoger $x_1$ como las ventas de la región $A$, $y$ son la ventas de la región $B$. Nuestra intervención (por ejemplo, una promoción) la aplicamos solamente en la región $B$. Entonces el modelo basado de $y$ en $x_1$ (ventas región $A$, que no es intervenida) nos da el contrafactual para comparar.
 
 Estas ideas son de el 
 método propuesto en [CausalImpact](https://github.com/google/CausalImpact), 
