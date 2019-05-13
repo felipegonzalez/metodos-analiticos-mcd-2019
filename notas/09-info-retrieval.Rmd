@@ -187,7 +187,7 @@ y el capítulo 4 de ([@manning]).
 Como discutimos arriba, el método de recuperación booleano tiene el defecto
 de que no produce ningún ordenamiento de los resultados. Podríamos considerar
 intentar algo como usar similitud de Jaccard entre documentos recuperados y consulta, pero esto no va a funcionar muy bien: en primer lugar, la consulta es de tamaño fijo,
-pero los documentos pueden variar mucho en tamaño. El coeficiente de jaccard
+pero los documentos pueden variar mucho en tamaño. El coeficiente de Jaccard
 tendería a dar menor similitud para documentos más largos. En segundo
 lugar, documentos con más alta frecuencia de los términos consultados son
 típicamente más relevantes a la consulta, y el coeficiente de Jaccard no toma en cuenta el número de ocurrencias.
