@@ -192,7 +192,7 @@ tendería a dar menor similitud para documentos más largos. En segundo
 lugar, documentos con más alta frecuencia de los términos consultados son
 típicamente más relevantes a la consulta, y el coeficiente de Jaccard no toma en cuenta el número de ocurrencias.
 
-Un primer paso es ponderarar cada término en un documento dependiendo
+Un primer paso es ponderar cada término en un documento dependiendo
 del número de veces que el término aparece en el documento.
 
 ### Ponderación por frecuencia de términos
