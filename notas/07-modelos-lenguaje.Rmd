@@ -14,7 +14,7 @@ el [capítulo 3](https://web.stanford.edu/~jurafsky/slp3/3.pdf)
 
 
 
-## Ejemplo: Modelo de canal ruidoso.
+## Ejemplo: Modelo de canal ruidoso
 
 Para entender más este problema consideramos el modelo del canal ruidoso:
 
@@ -37,7 +37,7 @@ $$P(W|X).$$
 
 Propondríamos entonces como origen el texto $W^*$ que maximiza esta probabilidad condicional:
 
-$$W^* = argmax_W P(W|X).$$
+$$W^* = argmax_W P(W|X),$$
 
 que en principio es un máximo sobre todas las posibles frases del lenguaje.
 
@@ -52,7 +52,7 @@ $$ W^* = argmax_W P(X|W)P(W).$$
 
 Esta forma tiene dos partes importantes:
 
-1. **Verosimilitud**: la probabilidad $P(X|W)$ de observar el mensaje transfromado $X$ dado que el mensaje es $W$. Este el el  **modelo del canal** (o **modelo de errores**), que nos dice cómo ocurren errores o transformaciones $X$ cuando se pretende comunicar el mensaje $W$.
+1. **Verosimilitud**: la probabilidad $P(X|W)$ de observar el mensaje transfromado $X$ dado que el mensaje es $W$. Este es el  **modelo del canal** (o **modelo de errores**), que nos dice cómo ocurren errores o transformaciones $X$ cuando se pretende comunicar el mensaje $W$.
 
 2. **Inicial** o **previa**: La probabilidad $P(W)$ de observar el mensaje $W$ en el contexto actual. Esto depende más del lenguaje que del canal, y le llamamos el **modelo del lenguaje**.
 
@@ -286,8 +286,8 @@ No necesitaremos calcular las probabilidades
 $P(w)$ (una sola palabra), pues podemos como símbolo inicial
 de cada frase un símbolo fijo como $\langle s \rangle$, y al final un símbolo
 como $\langle /s \rangle$. Así, por ejemplo, $P(el|\langle s\rangle)$ es la probabilidad
-de que la frase empiece on la palabra *el*. Entonces, para calcular
-por ejemplo P(El perro corre), haríamos, bajo el modelo de bigramas
+de que la frase empiece сon la palabra *el*. Entonces, para calcular
+por ejemplo $P(El\, perro\, corre)$, haríamos, bajo el modelo de bigramas
 
 $$P(\langle s \rangle el\,perro\, corre \langle /s \rangle) = 
 P(\langle s \rangle)P(el|\langle s \rangle)P(perro|el)P(corre|perro)P(corre|\langle /s \rangle)$$
@@ -486,7 +486,7 @@ df_tokens
 
 El problema es que no observamos "muy soleado".
 
-- El modelo de trigramas, también da probabilidad 0 a la última frase, lo cual parece también parece incorrecto
+- El modelo de trigramas, también da probabilidad 0 a la última frase, lo cual también parece incorrecto
 
 ---
 
@@ -495,7 +495,7 @@ un bigrama (o trigrama, etc.) dado, la probabilidad asignada es 0.
 
 Aunque para algunas frases esta asignación es correcta (una texto que no puede
 ocurrir en el lenguaje), muchas veces esto se debe a que los datos son ralos: la mayor
-parte de la frases posibles no son observadas en nuestro corpus, y es erróneo
+parte de las frases posibles no son observadas en nuestro corpus, y es erróneo
 asignarles probabilidad 0. Más en general, cuando los conteos de bigramas son
 chicos, sabemos que nuestra estimación por máxima verosimilitud tendrá varianza 
 alta.
@@ -807,7 +807,7 @@ ocurrencias en la muestra de entrenamiento. A este proceso se
 le llama **backoff**.
 
 Un método popular con mejor desempeño que Laplace es
-el **Kneser-Kney**. Consideremos el caso de bigramas.
+el **Kneser-Ney**. Consideremos el caso de bigramas.
 
 En primer lugar, este método utiliza interpolación con
 un modelo para bigramas:
