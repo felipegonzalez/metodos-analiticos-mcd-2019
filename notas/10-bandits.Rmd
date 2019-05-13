@@ -6,8 +6,8 @@ como conversiones, ventas, tráfico, tasas de click-through, etc.
 
 ## Causalidad y contrafactuales
 
-Para entender por qué este problema no es trivial, consideremos
-que alguien estamos considerando hacer una modificación del algoritmo de búsquedas de una tienda online. Por ejemplo: quizá estamos pensando
+Para entender por qué este problema no es trivial, consideremos aquí un caso en
+que alguien hace una modificación del algoritmo de búsquedas de una tienda online. Por ejemplo: quizá estamos pensando
 en usar un nuevo algoritmo para ordenar los resultados de una búsqueda
 en la tienda.
 
