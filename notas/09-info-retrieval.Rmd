@@ -406,9 +406,10 @@ y no del documento.
 #### Ejemplo {-}
 En nuestro minicorpus, las frecuencias inversas son
 ```{r}
+td_mat <- as.matrix(td_sparse)
 n_i <- row_sums(td_mat > 0)
 idf <- log(ncol(td_mat)/n_i)
-data_frame(termino = names(n_i), n = n_i, idf = round(sort(idf), 3))
+data_frame(termino = names(n_i), n = n_i, idf = round((idf), 3)) %>% arrange(desc(idf))
 ```
 
 Y entonces la representación vectorial está dada por
@@ -613,7 +614,9 @@ como "documentos latentes". Consideramos los primeros dos:
 ```{r}
 U_2 <- - svd_ejemplo$u[,1:2]
 rownames(U_2) <- rownames(td_mat)
-round(U_2, 1)[order(U_2[,1]),]
+U_ord <- round(U_2, 1)[order(U_2[,1]),]
+U_ord
+nom_ord <- rownames(U_ord)
 ```
 
 Y notamos que la primera dimensión captura aquellos
@@ -637,7 +640,7 @@ tibble(frase = frases, v_1 = round(V_2[, 1], 1), v_2 = round(V_2[, 2], 1))
 
 Nótese que podemos pensar que esta es nuestra nueva matriz documentos-términos ($V_k$), con "términos" latentes o dimensiones latentes, y podemos **calcular similitudes de documentos usando la similitud
 coseno**. Para encontrar las coordenadas latentes de los documentos (en coordenadas $V$),
-notamos que como $C_k = U\Sigma_kV_k^t$, entonces
+notamos que como $C_k = U_k^t \Sigma_kV_kt$, entonces
 
 $$V_k^t = \Sigma_k^{-1}U_k^tC_k$$
 De modo que para mapear un nuevo documento o query $q$ en el espacio de dimensiones semánticas hacemos
