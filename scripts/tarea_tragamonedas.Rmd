@@ -1,0 +1,104 @@
+---
+title: "Ejercicio de tragamonedas"
+output: html_document
+---
+
+Considera un tragamonedas, donde cada brazo tiene una distribución
+Poisson de recompensas con parámetros
+$$\lambda = (8, 9, 5, 3, 2)$$
+
+1. Simula una corrida del tragamonedas usando el algoritmo e-miope,
+con $\epsilon = 0.2$ y número de corridas
+$n = 500$. Al final de la corrida, ¿cuántas veces jalaste
+cada palanca? ¿Cuál es la recompensa total durante el experimento?
+
+Usa el siguiente código copiado de la clase:
+
+```{r}
+library(tidyverse)
+crear_maquina_poisson <- function(lambda){
+  # utilizamos recompensas poisson con distintas medias lambda
+  n_brazos <- length(lambda)
+  simular_maquina <- function(brazo){
+      rpois(1, lambda = lambda[brazo])
+  }
+  simular_maquina
+}
+```
+
+```{r}
+lambda <- c(8, 9, 7, 5, 2)
+sim <- crear_maquina_poisson(lambda = lambda)
+```
+
+```{r}
+crear_epsilon_miope <- function(epsilon, inicial = 1, sim_fun){
+  n_brazos <- environment(sim_fun)$n_brazos
+  conteos <- rep(0, n_brazos)
+  iteracion <- 0
+  #recompensas <- vector("list", n_brazos)
+  sumas <- rep(0, n_brazos)
+  S <- rep(0, n_brazos)
+  mejor <- inicial
+  epsilon <- epsilon
+  fun <- function(){
+    if(runif(1) <= epsilon){
+      #explorar
+      brazo <- sample.int(n_brazos, 1)
+    } else {
+      #explotar
+      brazo <- mejor
+    }
+    sim <- sim_fun(brazo)
+    #recompensas[[brazo]] <<- c(recompensas[[brazo]], sim)
+    media_ant <- ifelse(conteos[brazo] > 0, sumas[brazo] / conteos[brazo], 0)
+    conteos[brazo] <<- conteos[brazo] + 1
+    sumas[brazo] <<- sumas[brazo] + sim
+    media <- sumas[brazo] / conteos[brazo]
+    S[brazo] <<- S[brazo] + (sim - media_ant)*(sim - media)
+    mejor <<- which.max(sumas /conteos)
+    iteracion <<- iteracion + 1
+    estado <- data_frame(n = iteracion,
+                         brazo = 1:n_brazos,
+                         conteo = conteos,
+                         suma = sumas, 
+                         media = sumas / conteos,
+                         ee = sqrt(S / conteos)/sqrt(conteos))
+    return(estado)
+  }
+  fun
+}
+```
+
+```{r}
+## Aquí tu código para simular y resumir
+```
+
+2. Ahora utiliza un tragamonedas bayesiano para repetir este experimento.
+Tips:
+
+- Uitliza como iniciales distribuciones exponenciales (que son gamma) con
+media 5 ($\lambda = 1/5)$. Por ejemplo, esto coincide con el escenario
+de que en un porcentaje alto de los casos el retorno promedio que esperamos
+es menor a 10 unidades, y que en más de la mitad de los casos el retorno es 3-4 unidades.
+
+- Utiliza el hecho de que si la inicial es exponencial con
+parámetro $\lambda$, las observaciones tienen distribución poisson, y observamos una suma de retornos igual a $S$ en $n$ pruebas,
+entonces la posterior tiene distribución gamma
+con parámetros $\alpha = S + 1$ y $\beta= \lambda + n$. La puedes simular, por ejemplo, haciendo:
+```{r}
+n <- 10 # 10 pruebas
+suma <- 23 # suma de observaciones (retornos)
+media <- 23/10
+lambda_1 <- 1/5
+media
+# posterior
+sims <- rgamma(1000, suma + 1, n + lambda_1)
+qplot(sims) +
+  geom_vline(xintercept = media, colour = "red")
+```
+
+
+- Usa el ejemplo que vimos en clase y sustituye las distribuciones correctas. Solo 
+tienes que cambiar tres líneas del código que usamos para el caso bernoulli 
+(donde aparece rbeta).

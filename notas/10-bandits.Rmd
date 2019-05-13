@@ -1,13 +1,13 @@
 # Experimentación y algoritmos de tragamonedas (bandits)
-Costos de experimentación
+
 En esta sección consideramos el problema de hacer cambios
 en un sitio web, por ejemplo, con el fin de mejorar métricas
 como conversiones, ventas, tráfico, tasas de click-through, etc.
 
 ## Causalidad y contrafactuales
 
-Para entender por qué este problema no es trivial, consideremos
-que alguien estamos considerando hacer una modificación del algoritmo de búsquedas de una tienda online. Por ejemplo: quizá estamos pensando
+Para entender por qué este problema no es trivial, consideremos aquí un caso en
+que alguien hace una modificación del algoritmo de búsquedas de una tienda online. Por ejemplo: quizá estamos pensando
 en usar un nuevo algoritmo para ordenar los resultados de una búsqueda
 en la tienda.
 
@@ -22,7 +22,7 @@ Esto no quiere decir que nuestro cambio fue positivo, pues quizá las
 ventas hubieran sido aún mayores si no hubiérmos hecho el cambio.
 
 Otra aproximación simplista en los negocios es comparar *year over year*, por ejemplo, comparamos esta navidad con las anteriores. Esto también da un
-resultado difícil de interpretar, pues estamos comparados dos periodos
+resultado difícil de interpretar, pues estamos comparando dos periodos
 alejados en el tiempo.
 
 ```{block2, type="resumen"}
@@ -59,10 +59,10 @@ cuando se hizo la intervención. La línea punteada es el contrafactual estimado
 
 
 
-- Este análisis se basa en la construcción de **contrafactuales** con modelos dinámicos bayesianos. La idea es simple: supongamos que nuestra métrica de interés es $y$. Enconcontramos una covariable $x_1$, y construimos un modelo
+- Este análisis se basa en la construcción de **contrafactuales** con modelos dinámicos bayesianos. La idea es simple: supongamos que nuestra métrica de interés es $y$. Encontramos una covariable $x_1$, y construimos un modelo
 (con los datos anteriores a la intervención) para $y$ con $x_1$ como covariable. La covariable $x_1$ debe ser escogida de forma que **tengamos evidencia fuerta** de que esta variable **no será afectada por la intervención**. De este forma, el contrafactual después de la intervención se construye haciendo la predicción de $y$ basada en $x_1$, y nos da una idea de lo que hubiera pasado sin la intervención.
 
-- Por ejemplo, en algunos casos podemos escoger $x_1$ como las ventas de la región A, $y$ son la ventas de la región $B$. Nuestra intervención (por ejemplo, una promoción) la aplicamos solamente en la región $B$. Entonces el modelo basado de $y$ en $x_1$ (ventas región A, que no es intervenida) nos da el contrafactual para comparar.
+- Por ejemplo, en algunos casos podemos escoger $x_1$ como las ventas de la región $A$, $y$ son la ventas de la región $B$. Nuestra intervención (por ejemplo, una promoción) la aplicamos solamente en la región $B$. Entonces el modelo basado de $y$ en $x_1$ (ventas región $A$, que no es intervenida) nos da el contrafactual para comparar.
 
 Estas ideas son de el 
 método propuesto en [CausalImpact](https://github.com/google/CausalImpact), 
@@ -191,7 +191,7 @@ son:
 
 La estimación directa de el valor esperado \@ref(eq:difcausal) la haríamos con
 el promedio
-$$\frac{1}{n}\sum_i (Y_i(1) - Y_i(0))$$
+$$\frac{1}{n}\sum_i \left(Y_i(1) - Y_i(0)\right)$$
 y notamos inmediatamente una dificultad: no observamos esta diferencia
 para ninguno de los usuarios! Para cada usuario, observamos solamente una
 de $Y_i(1)$ o $Y_i(0)$. Los datos, por ejemplo, se verían:
@@ -233,7 +233,7 @@ de
 $$E[Y|T = 1] = E[Y(1)|T=1]$$
 Así que cuando la asignación del tratamiento está asociada a la variable
 de respuesta $Y$, esta última cantidad no es necesariamente igual
-a $E(Y(1))$. Explica en tus palabras por qué pasa esto (puedes comenzar
+a $E\left(Y(1)\right)$. Explica en tus palabras por qué pasa esto (puedes comenzar
 con el ejemplo de *paid search* que vimos arriba).
 
 Igualmente, el promedio $\frac{1}{n_0} \sum_{T_i = 0} Y_i$ estima
@@ -250,7 +250,7 @@ juntos el resultado más su contrafactual.
 
 Con un experimento, sin embargo, podemos superar este problema.
 Si **asignamos el tratamiento de manera aleatoria**, entonces
-por definición $E(Y(0)) = E(Y(0)|T=0)$ y $E(Y(1)) = E(Y(1)|T=0)$ (T
+por definición $E(Y(0)) = E\left(Y(0)|T=0\right)$ y $E\left(Y(1)\right) = E\left(Y(1)|T=0\right)$ ($T$
 es una variable aleatoria que no está correlacionada con ninguna otra variable),
 y el estimador estándar \@ref(eq:estandar) es un estimador insesgado 
 de la cantidad que nos interesa, que es \@ref(eq:difcausal).
@@ -986,8 +986,7 @@ que las $p_a(\theta|y_1,\ldots, y_{t})$ son distribuciones beta independientes
 con parámetros
 $$\theta\vert y_1\ldots, y_{t}\sim Beta(Y_{a,t} + 1, N_{a,t} - Y_{a,t} + 1),$$
 donde $N_{a,t}$ es el número de veces que se ha usado la palanca $a$ al tiempo $t$,
-y $Y_{a,t}$ es el número de 1's observado. Podemos simular de las betas para
-calcular los pesos $w_{a,t+1}$ de la siguiente forma:
+y $Y_{a,t}$ es el número de 1's observado. Podemos simular de las betas para calcular los pesos $w_{a,t+1}$ de la siguiente forma:
 
 
 ```{r}
@@ -1002,7 +1001,8 @@ crear_bayesiano <- function(sim_fun, num_sims = 1000, a = 1, b = 1){
                        sumas = sumas) %>% 
       mutate(sims = map2(conteos, sumas,
           function(n, y){
-            tibble(sim_no = 1:num_sims, valor = rbeta(num_sims, y + a, n - y + b))
+            tibble(sim_no = 1:num_sims, 
+                   valor = rbeta(num_sims, y + a, n - y + b))
           })) %>% 
       select(brazos, sims) %>% unnest %>% 
       group_by(sim_no) %>% 
@@ -1038,15 +1038,42 @@ Y simulamos un ejemplo:
 
 ```{r}
 set.seed(99770)
-sim_3 <- crear_maquina_bernoulli(lambda = c(0.05, 0.30, 0.15))
+lambda <-  c(0.05, 0.30, 0.15, 0.28)
+sim_3 <- crear_maquina_bernoulli(lambda = lambda)
 bayesiano <- crear_bayesiano(sim_fun = sim_3)
 df_iteraciones <- lapply(1:600, function(i){
   bayesiano()
 }) %>% bind_rows %>% as_tibble()
 tail(df_iteraciones)
-ggplot(df_iteraciones, aes(x = n, ymin = inf, ymax = sup, group = brazo,
-                           colour = factor(brazo))) +
-  geom_ribbon(alpha = 0.1)
+ggplot(df_iteraciones, aes(x = n, ymin = inf, ymax = sup)) +
+  geom_ribbon(alpha = 0.2) + facet_wrap(~brazo) +
+  geom_hline(data = tibble(brazo = 1:length(lambda), prob = lambda),
+             aes(yintercept = prob), linetype = "dotted", colour = "gray") +
+  geom_hline(aes(yintercept = max(lambda)), colour = "red", 
+             linetype = "dotted")
+```
+
+Podemos usar nuestra información antes del experimento. Por ejemplo,
+en el caso de conversiones, las proporciones son muchas veces chicas,
+por ejemplo
+
+
+```{r}
+set.seed(99771)
+lambda <-  c(0.03, 0.035, 0.01, 0.004)
+sim_3 <- crear_maquina_bernoulli(lambda = lambda)
+# iniciales beta(1, 6)
+quantile(rbeta(1500, 1, 20))
+bayesiano <- crear_bayesiano(sim_fun = sim_3, a = 1, b = 20)
+df_iteraciones_2 <- lapply(1:1500, function(i){
+  bayesiano()
+}) %>% bind_rows %>% as_tibble()
+ggplot(df_iteraciones_2, aes(x = n, ymin = inf, ymax = sup)) +
+  geom_ribbon(alpha = 0.2) + facet_wrap(~brazo) +
+  geom_hline(data = tibble(brazo = 1:length(lambda), prob = lambda),
+             aes(yintercept = prob), linetype = "dotted", colour = "gray") +
+  geom_hline(aes(yintercept = max(lambda)), colour = "red", 
+             linetype = "dotted")
 ```
 
 Observaciones:
@@ -1055,7 +1082,7 @@ Observaciones:
 es muy alta, entonces preferimos casi siempre al brazo $a$ sobre el brazo $b$.
 - Es necesario poner iniciales apropiadas para el problema. Por ejemplo,
 las conversiones (para muchas definiciones) rara vez superan 5\%, y en muchos casos
-son considerablemente menores a 1\%.
+son considerablemente menores a 1\%. 
 - Este esquema puede aplicarse con eficiencia a esquemas más
 complejos, considerando modelos más refinados para $p_a(y|\theta)$. Por ejemplo,
 puede haber parámetros compartidos entre los modelos, podemos usar regresión,
