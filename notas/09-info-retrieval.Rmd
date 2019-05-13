@@ -173,13 +173,13 @@ frases[perro_y_gato]
 
 - Como los id\'s están ordenados, es posible 
 encontrar la intersección de forma más eficiente. Ver [@manning], capítulo 1.
-- Piensa cómo sería el procesamiento de consultas cuando hay *AND*, *OR*, y *NOT*
+- Piensa cómo sería el procesamiento de consultas cuando hay *AND*, *OR*, y *NOT*.
 
 **Más acerca del índice invertido**
 
 - Para una colección grande de documentos, el índice invertido puede tener gran tamaño, y el desempeño en recuperación debe ser bueno. El índice invertido puede,
 por ejemplo, estar particionado en varios nodos de un cluster. Cada nodo contiene el índice de un subconjunto de documentos. Cuando hacemos una consulta se envía a todos los nodos, y cada uno de ellos devuelve documentos candidatos para ser agregados y presentados al usuario. Ver por ejemplo [Elasticsearch](https://www.elastic.co),
-y el capítulo 4 de ([@manning]).
+y el capítulo 4 de [@manning].
 
 
 ## Modelo de espacio vectorial
