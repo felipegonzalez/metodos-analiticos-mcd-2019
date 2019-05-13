@@ -360,7 +360,7 @@ head(recuperados, 10)
 
 Y los resultados son muy malos. La razón es que muchos documentos
 contienen la palabra *la*, y resultan en una similitud alta con la consulta.
-Sin embargo, la palabra *la* ocurren en una gran parte de los documentos,
+Sin embargo, la palabra *la* ocurre en una gran parte de los documentos,
 de modo que no discrimina mucho en nuestra búsqueda, y deberíamos ponderar
 más las palabras *cocina* y *comida*, que ocurren en una fracción menor y
 por lo tanto son más específicas a nuestra consulta.
