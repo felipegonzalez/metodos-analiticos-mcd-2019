@@ -1082,7 +1082,9 @@ Observaciones:
 es muy alta, entonces preferimos casi siempre al brazo $a$ sobre el brazo $b$.
 - Es necesario poner iniciales apropiadas para el problema. Por ejemplo,
 las conversiones (para muchas definiciones) rara vez superan 5\%, y en muchos casos
-son considerablemente menores a 1\%. 
+son considerablemente menores a 1\%.  Nótese que una especificación incorrecta
+de la inicial puede requerir corridas más largas, e intervalos de probabilidad
+mal calibrados.
 - Este esquema puede aplicarse con eficiencia a esquemas más
 complejos, considerando modelos más refinados para $p_a(y|\theta)$. Por ejemplo,
 puede haber parámetros compartidos entre los modelos, podemos usar regresión,
