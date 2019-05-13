@@ -6,8 +6,8 @@ como conversiones, ventas, tráfico, tasas de click-through, etc.
 
 ## Causalidad y contrafactuales
 
-Para entender por qué este problema no es trivial, consideremos
-que alguien estamos considerando hacer una modificación del algoritmo de búsquedas de una tienda online. Por ejemplo: quizá estamos pensando
+Para entender por qué este problema no es trivial, consideremos aquí un caso en
+que alguien hace una modificación del algoritmo de búsquedas de una tienda online. Por ejemplo: quizá estamos pensando
 en usar un nuevo algoritmo para ordenar los resultados de una búsqueda
 en la tienda.
 
@@ -22,7 +22,7 @@ Esto no quiere decir que nuestro cambio fue positivo, pues quizá las
 ventas hubieran sido aún mayores si no hubiérmos hecho el cambio.
 
 Otra aproximación simplista en los negocios es comparar *year over year*, por ejemplo, comparamos esta navidad con las anteriores. Esto también da un
-resultado difícil de interpretar, pues estamos comparados dos periodos
+resultado difícil de interpretar, pues estamos comparando dos periodos
 alejados en el tiempo.
 
 ```{block2, type="resumen"}
@@ -59,10 +59,10 @@ cuando se hizo la intervención. La línea punteada es el contrafactual estimado
 
 
 
-- Este análisis se basa en la construcción de **contrafactuales** con modelos dinámicos bayesianos. La idea es simple: supongamos que nuestra métrica de interés es $y$. Enconcontramos una covariable $x_1$, y construimos un modelo
+- Este análisis se basa en la construcción de **contrafactuales** con modelos dinámicos bayesianos. La idea es simple: supongamos que nuestra métrica de interés es $y$. Encontramos una covariable $x_1$, y construimos un modelo
 (con los datos anteriores a la intervención) para $y$ con $x_1$ como covariable. La covariable $x_1$ debe ser escogida de forma que **tengamos evidencia fuerta** de que esta variable **no será afectada por la intervención**. De este forma, el contrafactual después de la intervención se construye haciendo la predicción de $y$ basada en $x_1$, y nos da una idea de lo que hubiera pasado sin la intervención.
 
-- Por ejemplo, en algunos casos podemos escoger $x_1$ como las ventas de la región A, $y$ son la ventas de la región $B$. Nuestra intervención (por ejemplo, una promoción) la aplicamos solamente en la región $B$. Entonces el modelo basado de $y$ en $x_1$ (ventas región A, que no es intervenida) nos da el contrafactual para comparar.
+- Por ejemplo, en algunos casos podemos escoger $x_1$ como las ventas de la región $A$, $y$ son la ventas de la región $B$. Nuestra intervención (por ejemplo, una promoción) la aplicamos solamente en la región $B$. Entonces el modelo basado de $y$ en $x_1$ (ventas región $A$, que no es intervenida) nos da el contrafactual para comparar.
 
 Estas ideas son de el 
 método propuesto en [CausalImpact](https://github.com/google/CausalImpact), 
@@ -191,7 +191,7 @@ son:
 
 La estimación directa de el valor esperado \@ref(eq:difcausal) la haríamos con
 el promedio
-$$\frac{1}{n}\sum_i (Y_i(1) - Y_i(0))$$
+$$\frac{1}{n}\sum_i \left(Y_i(1) - Y_i(0)\right)$$
 y notamos inmediatamente una dificultad: no observamos esta diferencia
 para ninguno de los usuarios! Para cada usuario, observamos solamente una
 de $Y_i(1)$ o $Y_i(0)$. Los datos, por ejemplo, se verían:
@@ -233,7 +233,7 @@ de
 $$E[Y|T = 1] = E[Y(1)|T=1]$$
 Así que cuando la asignación del tratamiento está asociada a la variable
 de respuesta $Y$, esta última cantidad no es necesariamente igual
-a $E(Y(1))$. Explica en tus palabras por qué pasa esto (puedes comenzar
+a $E\left(Y(1)\right)$. Explica en tus palabras por qué pasa esto (puedes comenzar
 con el ejemplo de *paid search* que vimos arriba).
 
 Igualmente, el promedio $\frac{1}{n_0} \sum_{T_i = 0} Y_i$ estima
@@ -250,7 +250,7 @@ juntos el resultado más su contrafactual.
 
 Con un experimento, sin embargo, podemos superar este problema.
 Si **asignamos el tratamiento de manera aleatoria**, entonces
-por definición $E(Y(0)) = E(Y(0)|T=0)$ y $E(Y(1)) = E(Y(1)|T=0)$ (T
+por definición $E(Y(0)) = E\left(Y(0)|T=0\right)$ y $E\left(Y(1)\right) = E\left(Y(1)|T=0\right)$ ($T$
 es una variable aleatoria que no está correlacionada con ninguna otra variable),
 y el estimador estándar \@ref(eq:estandar) es un estimador insesgado 
 de la cantidad que nos interesa, que es \@ref(eq:difcausal).
@@ -259,12 +259,12 @@ de la cantidad que nos interesa, que es \@ref(eq:difcausal).
 ## Costos de experimentación
 
 Ahora supongamos que para simplificar nuestra vida, y tener resultados
-sólidos, decidimos hacer un experimento A/B en nuestro sitio web. Decidimos
-entonces, cada vez que un usuario pide una página x, tiramos un volado y decidimos
-si le enseñamos la versión A y la versión B. Lo que hace este usuario en el resto
+sólidos, decidimos hacer un experimento $A/B$ en nuestro sitio web. Decidimos
+entonces, cada vez que un usuario pide una página $x$, tiramos un volado y decidimos
+si le enseñamos la versión $A$ y la versión $B$. Lo que hace este usuario en el resto
 de su sesión estará registrado en los logs del sitio (o en una base de datos si
 nuestra aplicación registra los resultados de interés). Podemos entonces, después
-de tener un número apriopiado de usuarios en cada rama A y B, comparar los
+de tener un número apriopiado de usuarios en cada rama $A$ y $B$, comparar los
 dos grupos y tomar una decisión final acerca de qué versión nos conviene.
 
 Las primeras objeciones que podemos hacer a esta decisión (y que muchos interesados
@@ -276,7 +276,7 @@ en el negocio seguramente plantearán):
 
 - El camino de la experimentación muchas veces es contrario al pensamiento de los analistas de negocios/tomadores de decisiones, que a veces prefieren hacer análisis diseñados para entender el potencial de cambio *antes* de hacer ningún cambio. Por ejemplo encuestas, pruebas en focus groups, etc. **Respuesta**: el análisis ad-hoc es una herramienta poderosa, pero también muchas veces plagada de incertidumbre no siempre explícita (por ejemplo, muy dependiente del tipo de modelos que se consideran, o de los datos que se tienen a mano). Es posible combinar las dos aproximaciones.
 
-En particular, los experimentos A/B (que pueden tener más de 2 opciones) tienen la debilidad de que
+En particular, los experimentos $A/B$ (que pueden tener más de $2$ opciones) tienen la debilidad de que
 
 - Cuando hacemos experimentación, generalmente decidimos cuánto tiempo va a durar el experimento para tener tamaños de muestra adecuados. En algunos casos, las opciones son tan malas o tan buenas en relación a otras que esto es un desperdicio de dinero (podemos descartar una opción rápidamente por ser muy mala). 
 
@@ -289,7 +289,7 @@ antes de que se completen las muestras diseñadas. Esto intuitivamente es una ma
 
 - Muchas veces, se considera que los más importante de controlar es el error tipo I (declarar
 un cambio como mejoría cuando realmente es más o menos equivalente a lo que teníamos antes) mediante
-algún nivel de significancia (5\%). En la práctica, 
+algún nivel de significancia ($5\%$). En la práctica, 
 nos preocupan más los errores de tipo II (no escoger un cambio que representa ganancias grandes), especialmente cuando el costo
 de hacer cambios es relativamente bajo, como en el caso de páginas web
 o algoritmo de machine learning usado, por ejemplo.
