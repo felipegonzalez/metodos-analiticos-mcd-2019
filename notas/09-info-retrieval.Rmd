@@ -640,7 +640,7 @@ tibble(frase = frases, v_1 = round(V_2[, 1], 1), v_2 = round(V_2[, 2], 1))
 
 Nótese que podemos pensar que esta es nuestra nueva matriz documentos-términos ($V_k$), con "términos" latentes o dimensiones latentes, y podemos **calcular similitudes de documentos usando la similitud
 coseno**. Para encontrar las coordenadas latentes de los documentos (en coordenadas $V$),
-notamos que como $C_k = U\Sigma_kV_kt$, entonces
+notamos que como $C_k = U_k^t \Sigma_kV_kt$, entonces
 
 $$V_k^t = \Sigma_k^{-1}U_k^tC_k$$
 De modo que para mapear un nuevo documento o query $q$ en el espacio de dimensiones semánticas hacemos
